@@ -18,7 +18,7 @@
 .title {
     font-size: 3rem;
     margin-bottom: 0;
-    background: linear-gradient(to right, #00ff88, #00cbff);
+    background: linear-gradient(to right, #ff9d00, #7b2ff7);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -29,7 +29,7 @@
 .syncing {
     display: inline-block;
     font-size: 1.5rem;
-    color: #00ff88;
+    color: #ff9d00;
     animation: spin 1s linear infinite;
     -webkit-text-fill-color: initial;
     background: none;
@@ -103,7 +103,7 @@
 
 .completenessBadge {
     font-size: 0.65rem;
-    color: #00ff88;
+    color: #ff9d00;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -123,7 +123,7 @@
 }
 
 .completeNow:hover {
-    color: #00ff88;
+    color: #ff9d00;
 }
 
 .portability {
@@ -153,8 +153,8 @@
 
 .authBtn {
     background: transparent;
-    border: 1px solid rgba(0, 255, 136, 0.5);
-    color: #00ff88;
+    border: 1px solid rgba(255, 157, 0, 0.5);
+    color: #ff9d00;
     padding: 0.5rem 1rem;
     border-radius: 20px;
     cursor: pointer;
@@ -163,8 +163,8 @@
 }
 
 .authBtn:hover {
-    background: rgba(0, 255, 136, 0.1);
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    background: rgba(255, 157, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 157, 0, 0.2);
 }
 
 .statsSection {
@@ -190,7 +190,7 @@
 .statValue {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #00ff88;
+    color: #ff9d00;
 }
 
 .statLabel {
@@ -208,9 +208,9 @@
 }
 
 .sessionBtn {
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.2);
-    color: #00ff88;
+    background: rgba(255, 157, 0, 0.1);
+    border: 1px solid rgba(255, 157, 0, 0.2);
+    color: #ff9d00;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.75rem;
@@ -219,8 +219,8 @@
 }
 
 .sessionBtn:hover:not(:disabled) {
-    background: rgba(0, 255, 136, 0.2);
-    border-color: rgba(0, 255, 136, 0.4);
+    background: rgba(255, 157, 0, 0.2);
+    border-color: rgba(255, 157, 0, 0.4);
 }
 
 .sessionBtn:disabled {
@@ -261,12 +261,12 @@
 
 .historyItem:hover {
     background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(0, 255, 136, 0.3);
+    border-color: rgba(255, 157, 0, 0.3);
 }
 
 .historyItemExpanded {
-    background: rgba(0, 255, 136, 0.03);
-    border-color: rgba(0, 255, 136, 0.4);
+    background: rgba(255, 157, 0, 0.03);
+    border-color: rgba(255, 157, 0, 0.4);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -301,8 +301,8 @@
 }
 
 .historyStats {
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
+    background: rgba(255, 157, 0, 0.1);
+    color: #ff9d00;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -396,7 +396,7 @@
 }
 
 .eduCard h3 {
-    color: #00ff88;
+    color: #ff9d00;
     font-size: 1.5rem;
     margin-bottom: 1rem;
 }
@@ -454,7 +454,7 @@
 .presetCard:hover {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(0, 255, 136, 0.5);
+    border-color: rgba(255, 157, 0, 0.5);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -464,15 +464,15 @@
 }
 
 .cardCompleted {
-    border-color: #00ff88;
-    background: rgba(0, 255, 136, 0.15);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+    border-color: #ff9d00;
+    background: rgba(255, 157, 0, 0.15);
+    box-shadow: 0 0 15px rgba(255, 157, 0, 0.3);
 }
 
 .cardCompleted:hover {
-    border-color: #00ffbb;
-    background: rgba(0, 255, 136, 0.25);
-    box-shadow: 0 0 25px rgba(0, 255, 136, 0.5);
+    border-color: #ffcb00;
+    background: rgba(255, 157, 0, 0.25);
+    box-shadow: 0 0 25px rgba(255, 157, 0, 0.5);
 }
 
 .presetName {
@@ -568,9 +568,9 @@
 }
 
 .addCard:hover {
-    border-color: #00ff88;
-    color: #00ff88;
-    background: rgba(0, 255, 136, 0.05);
+    border-color: #ff9d00;
+    color: #ff9d00;
+    background: rgba(255, 157, 0, 0.05);
 }
 
 /* Modal */
@@ -646,7 +646,7 @@
 }
 
 .saveBtn {
-    background: #00ff88;
+    background: #ff9d00;
     color: black;
 }
 
@@ -670,9 +670,9 @@
 }
 
 .success {
-    border-color: rgba(0, 255, 136, 0.3);
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
+    border-color: rgba(255, 157, 0, 0.3);
+    background: rgba(255, 157, 0, 0.1);
+    color: #ff9d00;
 }
 
 .error {

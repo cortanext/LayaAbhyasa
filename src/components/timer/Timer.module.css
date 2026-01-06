@@ -33,9 +33,9 @@
     stroke-linecap: round;
     animation: progress 1s ease-out forwards;
     transition: stroke-dasharray 1s linear;
-    stroke: #00ff88;
-    /* Neon Green */
-    filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.5));
+    stroke: #ff9d00;
+    /* Sunset Orange */
+    filter: drop-shadow(0 0 8px rgba(255, 157, 0, 0.5));
 }
 
 .timeText {
@@ -48,7 +48,7 @@
     font-weight: 700;
     font-size: 4rem;
     color: #fff;
-    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    text-shadow: 0 0 20px rgba(255, 157, 0, 0.5);
 }
 
 .phaseLabel {
