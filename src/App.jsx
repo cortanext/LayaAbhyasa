@@ -397,7 +397,7 @@ function App() {
                 <main className={styles.dashboard}>
                     <header className={styles.header}>
                         <div className={styles.titleSection}>
-                            <img src="/logo.png" alt="Flow Laya Logo" className={styles.appLogo} />
+                            <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto', marginBottom: '1rem' }} />
                             <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
@@ -595,9 +595,6 @@ function App() {
                                     your rhythm remains steady as you grow.
                                 </p>
                             </div>
-                        </div>
-                        <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-                            <img src="/assets.png" alt="Flow Laya Branding" style={{ maxWidth: '100%', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
                         </div>
                     </section>
 
