@@ -419,8 +419,8 @@ function App() {
                                     <div
                                         className={styles.userInfo}
                                         style={{
-                                            background: `linear-gradient(to right, rgba(255, 157, 0, 0.1) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)`,
-                                            border: `1px solid rgba(255, 157, 0, ${score / 400 + 0.1})`
+                                            background: `linear-gradient(to right, rgba(0, 255, 136, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)`,
+                                            border: `1px solid rgba(0, 255, 136, ${score / 200 + 0.1})`
                                         }}
                                     >
                                         <div className={styles.profileCompleteness}>
