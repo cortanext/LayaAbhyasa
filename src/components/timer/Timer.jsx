@@ -41,7 +41,7 @@ const Timer = ({ workoutName, duration, beepType, onComplete }) => {
             } else {
                 setIsActive(false);
                 playSound(beepType, 'complete'); // COMPLETE Sound
-                onComplete();
+                onComplete(false);
             }
         }
 
@@ -93,7 +93,7 @@ const Timer = ({ workoutName, duration, beepType, onComplete }) => {
 
             <h2 className={styles.workoutName}>{workoutName}</h2>
 
-            <button className={styles.stopButton} onClick={onComplete}>
+            <button className={styles.stopButton} onClick={() => onComplete(true)}>
                 Stop
             </button>
         </div>

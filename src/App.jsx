@@ -3,11 +3,11 @@ import Timer from './components/timer/Timer';
 import styles from './App.module.css';
 
 const DEFAULT_PRESETS = [
-    { id: 1, name: 'Breathe', duration: 120, type: 'gentle' },
-    { id: 2, name: 'Cat-Cow', duration: 60, type: 'gentle' },
-    { id: 3, name: 'Down Dog', duration: 60, type: 'gentle' },
-    { id: 4, name: 'Sun Salutation', duration: 300, type: 'gentle' },
-    { id: 5, name: 'Warrior Pose', duration: 60, type: 'gentle' },
+    { id: 1, name: 'Breathe', duration: 120, type: 'gentle', chime: 'gentle' },
+    { id: 2, name: 'Cat-Cow', duration: 60, type: 'gentle', chime: 'gentle' },
+    { id: 3, name: 'Down Dog', duration: 60, type: 'gentle', chime: 'gentle' },
+    { id: 4, name: 'Sun Salutation', duration: 300, type: 'gentle', chime: 'gentle' },
+    { id: 5, name: 'Warrior Pose', duration: 60, type: 'gentle', chime: 'gentle' },
 ];
 
 const API_URL = "https://cortanext-workout-timer.sri-050.workers.dev";
@@ -43,7 +43,7 @@ function App() {
         setTimeout(() => setToast({ message: '', type: null }), 3000);
     };
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalData, setModalData] = useState({ name: '', duration: 60, type: 'high', chime: 'high' });
+    const [modalData, setModalData] = useState({ name: '', duration: 60, type: 'gentle', chime: 'gentle' });
     const [editingId, setEditingId] = useState(null);
     const [completedWorkouts, setCompletedWorkouts] = useState([]);
 
@@ -291,16 +291,28 @@ function App() {
         }
     };
 
-    const stopWorkout = (completedId = null) => {
+    const stopWorkout = (completedId = null, wasAutoComplete = false) => {
         setActiveWorkout(null);
         if (completedId) {
             setCompletedWorkouts(prev => [...prev, completedId]);
+
+            // Auto-flow logic: find the next workout in the sequence
+            if (wasAutoComplete) {
+                const currentIndex = workouts.findIndex(w => w.id === completedId);
+                if (currentIndex !== -1 && currentIndex < workouts.length - 1) {
+                    const nextWorkout = workouts[currentIndex + 1];
+                    // Briefly wait to show completion before starting next
+                    setTimeout(() => {
+                        startWorkout(nextWorkout);
+                    }, 1500);
+                }
+            }
         }
     };
 
     const startCreating = () => {
         setEditingId(null);
-        setModalData({ name: '', duration: 60, type: 'high', chime: 'high' });
+        setModalData({ name: '', duration: 60, type: 'gentle', chime: 'gentle' });
         setIsModalOpen(true);
     };
 
@@ -768,7 +780,7 @@ function App() {
                     workoutName={activeWorkout.name}
                     duration={activeWorkout.duration}
                     beepType={activeWorkout.chime || activeWorkout.type}
-                    onComplete={() => stopWorkout(activeWorkout.id)}
+                    onComplete={(isManual) => stopWorkout(activeWorkout.id, !isManual)}
                 />
             )
             }
