@@ -397,6 +397,7 @@ function App() {
                 <main className={styles.dashboard}>
                     <header className={styles.header}>
                         <div className={styles.titleSection}>
+                            <img src="/logo.png" alt="Flow Laya Logo" className={styles.appLogo} />
                             <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
@@ -595,6 +596,9 @@ function App() {
                                 </p>
                             </div>
                         </div>
+                        <div style={{ marginTop: '4rem', textAlign: 'center' }}>
+                            <img src="/assets.png" alt="Flow Laya Branding" style={{ maxWidth: '100%', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                        </div>
                     </section>
 
                     {isLoginOpen && (
@@ -768,13 +772,16 @@ function App() {
                     beepType={activeWorkout.chime || activeWorkout.type}
                     onComplete={() => stopWorkout(activeWorkout.id)}
                 />
-            )}
-            {toast.message && (
-                <div className={`${styles.toast} ${styles[toast.type]}`}>
-                    {toast.message}
-                </div>
-            )}
-        </div>
+            )
+            }
+            {
+                toast.message && (
+                    <div className={`${styles.toast} ${styles[toast.type]}`}>
+                        {toast.message}
+                    </div>
+                )
+            }
+        </div >
     );
 }
 
