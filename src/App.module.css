@@ -72,7 +72,7 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 2rem;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .userControls {
@@ -420,6 +420,27 @@
     }
 }
 
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center;
+    }
+
+    .userControls {
+        align-items: center !important;
+        width: 100%;
+    }
+
+    .title {
+        font-size: 2rem !important;
+    }
+
+    .presetGrid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
 .detailDuration {
     color: rgba(0, 0, 0, 0.6);
     font-size: 0.9rem;
@@ -427,7 +448,7 @@
 
 .presetGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1.5rem;
     padding: 1rem;
 }
