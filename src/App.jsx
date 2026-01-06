@@ -403,13 +403,6 @@ function App() {
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
                         </div>
                         <div className={styles.userControls}>
-                            <div className={styles.portability}>
-                                <button onClick={handleExport} className={styles.portBtn}>Export</button>
-                                <label className={styles.portBtn}>
-                                    Import
-                                    <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-                                </label>
-                            </div>
                             {user ? (() => {
                                 const email = typeof user === 'object' ? user?.email : user;
                                 const age = typeof user === 'object' ? user?.age_range : null;
@@ -426,8 +419,8 @@ function App() {
                                     <div
                                         className={styles.userInfo}
                                         style={{
-                                            background: `linear-gradient(to right, rgba(0, 255, 136, 0.15) ${score}%, rgba(255, 255, 255, 0.05) ${score}%)`,
-                                            border: `1px solid rgba(0, 255, 136, ${score / 200 + 0.1})`
+                                            background: `linear-gradient(to right, rgba(255, 157, 0, 0.1) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)`,
+                                            border: `1px solid rgba(255, 157, 0, ${score / 400 + 0.1})`
                                         }}
                                     >
                                         <div className={styles.profileCompleteness}>
@@ -455,6 +448,14 @@ function App() {
                             })() : (
                                 <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login to Sync</button>
                             )}
+
+                            <div className={styles.portability}>
+                                <button onClick={handleExport} className={styles.portBtn}>Export Data</button>
+                                <label className={styles.portBtn}>
+                                    Import Data
+                                    <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+                                </label>
+                            </div>
                         </div>
                     </header>
 
