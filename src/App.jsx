@@ -597,7 +597,7 @@ function App() {
                             </div>
                         </div>
                         <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-                            <img src="/assets.png" alt="Flow Laya Branding" style={{ maxWidth: '100%', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                            <img src="/assets.png" alt="Flow Laya Branding" style={{ maxWidth: '100%', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
                         </div>
                     </section>
 

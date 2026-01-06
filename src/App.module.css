@@ -5,7 +5,7 @@
     flex-direction: column;
     justify-content: center;
     padding: 2rem 0;
-    background-color: #0d0d0d;
+    background-color: #ffffff;
 }
 
 .dashboard {
@@ -66,7 +66,7 @@
     height: auto;
     margin-bottom: 20px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.8s ease;
 }
 
@@ -88,7 +88,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: white;
+    color: #1a1a1a;
     font-size: 0.9rem;
     padding: 8px 18px;
     border-radius: 20px;
@@ -133,9 +133,9 @@
 }
 
 .portBtn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.6);
     padding: 0.4rem 0.8rem;
     border-radius: 15px;
     cursor: pointer;
@@ -146,9 +146,9 @@
 }
 
 .portBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.1);
+    color: #000;
+    border-color: rgba(0, 0, 0, 0.3);
 }
 
 .authBtn {
@@ -170,9 +170,10 @@
 .statsSection {
     margin-top: 2rem;
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: #fcfcfc;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .statsRow {
@@ -195,7 +196,7 @@
 
 .statLabel {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -236,7 +237,7 @@
 
 .sectionTitle {
     font-size: 1.2rem;
-    color: white;
+    color: #1a1a1a;
     margin-bottom: 1rem;
     opacity: 0.8;
 }
@@ -248,8 +249,8 @@
 }
 
 .historyItem {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #fcfcfc;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     padding: 1rem;
     display: flex;
@@ -257,17 +258,19 @@
     gap: 1rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .historyItem:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: #ffffff;
     border-color: rgba(255, 157, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .historyItemExpanded {
-    background: rgba(255, 157, 0, 0.03);
+    background: #ffffff;
     border-color: rgba(255, 157, 0, 0.4);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .historyMain {
@@ -291,13 +294,13 @@
 }
 
 .historyName {
-    color: white;
+    color: #1a1a1a;
     font-weight: 500;
 }
 
 .historyDate {
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .historyStats {
@@ -337,7 +340,7 @@
     flex-direction: column;
     gap: 0.5rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     animation: slideDown 0.3s ease-out;
 }
 
@@ -358,7 +361,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.6rem 1rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.02);
     border-radius: 8px;
     font-size: 0.85rem;
 }
@@ -370,7 +373,7 @@
 }
 
 .detailName {
-    color: white;
+    color: #1a1a1a;
     font-size: 0.95rem;
     font-weight: 500;
 }
@@ -384,9 +387,10 @@
 .educationSection {
     margin-top: 4rem;
     padding: 3rem;
-    background: rgba(255, 255, 255, 0.02);
+    background: #fcfcfc;
     border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
 }
 
 .eduGrid {
@@ -402,7 +406,7 @@
 }
 
 .eduCard p {
-    color: rgba(255, 255, 255, 0.7);
+    color: #4a4a4a;
     line-height: 1.8;
     font-size: 1.1rem;
 }
@@ -419,7 +423,7 @@
 }
 
 .detailDuration {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.6);
     font-size: 0.9rem;
 }
 
@@ -432,8 +436,8 @@
 
 .presetCard {
     position: relative;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #fcfcfc;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     padding: 1.5rem;
     cursor: pointer;
@@ -441,45 +445,45 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     min-height: 120px;
     justify-content: center;
 }
 
 .cardGentle {
-    border-color: rgba(255, 100, 255, 0.3);
-    background: rgba(255, 100, 255, 0.05);
+    border-color: rgba(123, 47, 247, 0.2);
+    background: rgba(123, 47, 247, 0.03);
 }
 
 .presetCard:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.1);
+    background: #ffffff;
     border-color: rgba(255, 157, 0, 0.5);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
 .cardGentle:hover {
-    border-color: rgba(255, 100, 255, 0.5);
-    box-shadow: 0 10px 30px rgba(255, 0, 255, 0.2);
+    border-color: rgba(123, 47, 247, 0.5);
+    box-shadow: 0 12px 30px rgba(123, 47, 247, 0.15);
 }
 
 .cardCompleted {
     border-color: #ff9d00;
-    background: rgba(255, 157, 0, 0.15);
-    box-shadow: 0 0 15px rgba(255, 157, 0, 0.3);
+    background: rgba(255, 157, 0, 0.08);
+    box-shadow: 0 4px 15px rgba(255, 157, 0, 0.15);
 }
 
 .cardCompleted:hover {
     border-color: #ffcb00;
-    background: rgba(255, 157, 0, 0.25);
-    box-shadow: 0 0 25px rgba(255, 157, 0, 0.5);
+    background: rgba(255, 157, 0, 0.12);
+    box-shadow: 0 8px 25px rgba(255, 157, 0, 0.25);
 }
 
 .presetName {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.8rem;
-    color: #fff;
+    color: #1a1a1a;
 }
 
 .prese.title {
@@ -491,10 +495,11 @@
 
 .subtitle {
     font-size: 1.1rem;
-    color: #a594f9;
+    color: #7b2ff7;
+    /* Rich Purple */
     margin-top: -0.2rem;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
@@ -507,19 +512,19 @@
 
 .presetTime {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.3);
+    color: #4a4a4a;
+    background: rgba(0, 0, 0, 0.05);
     padding: 0.2rem 0.8rem;
     border-radius: 12px;
 }
 
 .tagGentle {
     font-size: 0.7rem;
-    color: #ff88ff;
-    background: rgba(255, 0, 255, 0.1);
+    color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.08);
     padding: 0.2rem 0.6rem;
     border-radius: 12px;
-    border: 1px solid rgba(255, 100, 255, 0.2);
+    border: 1px solid rgba(123, 47, 247, 0.2);
 }
 
 .cardActions {
@@ -534,7 +539,7 @@
 .deleteBtn {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(0, 0, 0, 0.2);
     font-size: 1rem;
     cursor: pointer;
     padding: 5px;
@@ -554,14 +559,14 @@
 }
 
 .addCard {
-    background: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(255, 255, 255, 0.1);
+    background: #fcfcfc;
+    border: 2px dashed rgba(0, 0, 0, 0.1);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: all 0.3s;
     min-height: 120px;
@@ -580,8 +585,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -590,15 +595,16 @@
 }
 
 .modalContent {
-    background: #1a1a1a;
+    background: #ffffff;
     padding: 2rem;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .modalContent input,
@@ -606,9 +612,9 @@
     width: 100%;
     padding: 0.8rem;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: black;
-    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8f8f8;
+    color: #1a1a1a;
     font-size: 1rem;
     margin-top: 0.5rem;
 }
@@ -621,7 +627,7 @@
 .formRow label {
     flex: 1;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.6);
 }
 
 .modalActions {
@@ -642,7 +648,7 @@
 
 .modalActions button[type="button"] {
     background: transparent;
-    color: white;
+    color: #4a4a4a;
 }
 
 .saveBtn {
@@ -655,17 +661,16 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 500;
     z-index: 1000;
     animation: toastIn 0.3s ease-out;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
     pointer-events: none;
 }
 
