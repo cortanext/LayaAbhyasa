@@ -73,6 +73,9 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
             <div className={styles.timerCircle}>
                 <div className={styles.timerBgImage} style={{ backgroundImage: 'url(/timer-bg.png)' }}></div>
                 <svg viewBox="0 0 36 36" className={styles.circularChart}>
+                    <defs>
+                        <path id="curvePath" d="M 5,18 A 13,13 0 0 1 31,18" />
+                    </defs>
                     <path
                         className={styles.circleBg}
                         d="M18 2.0845
@@ -86,14 +89,16 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
               a 15.9155 15.9155 0 0 1 0 31.831
               a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
+                    <text className={styles.curvedText}>
+                        <textPath xlinkHref="#curvePath" startOffset="50%" textAnchor="middle">
+                            {phase === 'getReady' ? 'GET READY' : workoutName}
+                        </textPath>
+                    </text>
                 </svg>
                 <div className={styles.timeText}>
-                    <div className={styles.phaseLabel}>{phase === 'getReady' ? 'GET READY' : 'WORK'}</div>
                     {formatTime(timeLeft)}
                 </div>
             </div>
-
-            <h2 className={styles.workoutName}>{workoutName}</h2>
 
             <button className={styles.stopButton} onClick={() => onComplete(true)} title="Stop Workout">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
