@@ -809,19 +809,21 @@ function App() {
                                     <option value="60min">1 Hour Full Practice</option>
                                 </select>
                             )}
-                            <label className={styles.settingToggle}>
-                                <input
-                                    type="checkbox"
-                                    checked={muteBeeps}
-                                    onChange={(e) => {
-                                        const val = e.target.checked;
-                                        setMuteBeeps(val);
-                                        localStorage.setItem('muteBeeps', val);
-                                    }}
-                                />
-                                <span>Mute Countdown Beeps</span>
-                            </label>
-                            <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
+                            <div className={styles.settingsSubRow}>
+                                <label className={styles.settingToggle}>
+                                    <input
+                                        type="checkbox"
+                                        checked={muteBeeps}
+                                        onChange={(e) => {
+                                            const val = e.target.checked;
+                                            setMuteBeeps(val);
+                                            localStorage.setItem('muteBeeps', val);
+                                        }}
+                                    />
+                                    <span>Mute Countdown Beeps</span>
+                                </label>
+                                <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
+                            </div>
                         </div>
                     </header>
 

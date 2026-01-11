@@ -67,6 +67,10 @@
     margin-left: auto;
 }
 
+.settingsSubRow {
+    display: contents;
+}
+
 .settingsSection {
     margin-top: 0.5rem;
     display: flex;
@@ -607,6 +611,19 @@
         gap: 0.8rem;
         width: 100%;
         margin-top: 0.5rem;
+        align-items: center;
+    }
+
+    .settingsSubRow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .totalTime {
+        margin-left: 0 !important;
     }
 
     .title {
