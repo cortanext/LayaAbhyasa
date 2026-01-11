@@ -69,6 +69,7 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
 
     return (
         <div className={styles.container}>
+            <img src="/logo.png" alt="Flow Laya Logo" className={styles.timerLogo} />
             <div className={styles.timerCircle}>
                 <svg viewBox="0 0 36 36" className={styles.circularChart}>
                     <path
