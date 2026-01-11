@@ -4,7 +4,7 @@ import styles from './Timer.module.css';
 
 // Removing speak import as it is replaced by long beep
 
-const Timer = ({ workoutName, duration, beepType, onComplete }) => {
+const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
     const [timeLeft, setTimeLeft] = useState(duration);
     const [phase, setPhase] = useState('getReady'); // getReady, work
     const [isActive, setIsActive] = useState(false);
@@ -51,10 +51,10 @@ const Timer = ({ workoutName, duration, beepType, onComplete }) => {
     // Audio cues
     useEffect(() => {
         // Only play countdown beeps (3-2-1) during the WORK phase (approaching end of workout)
-        if (isActive && phase === 'work' && timeLeft <= 3 && timeLeft > 0) {
+        if (isActive && phase === 'work' && timeLeft <= 3 && timeLeft > 0 && !muteBeeps) {
             playSound(beepType, 'countdown');
         }
-    }, [timeLeft, isActive, phase]);
+    }, [timeLeft, isActive, phase, muteBeeps]);
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);

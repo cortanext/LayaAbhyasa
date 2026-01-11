@@ -13,6 +13,8 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .title {
@@ -56,6 +58,25 @@
     font-size: 0.9rem;
     margin-top: 2px;
     font-weight: 600;
+}
+
+.settingsSection {
+    margin-top: 0.8rem;
+}
+
+.settingToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    user-select: none;
+}
+
+.settingToggle input {
+    cursor: pointer;
+    accent-color: #ff9d00;
 }
 
 .appLogo {
@@ -226,6 +247,66 @@
     opacity: 0.5;
     cursor: not-allowed;
     filter: grayscale(1);
+}
+
+.nextWorkoutSection {
+    margin: 1rem 0;
+    animation: slideDown 0.4s ease-out;
+}
+
+.nextWorkoutCard {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 157, 0, 0.2);
+}
+
+.nextWorkoutInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.nextLabel {
+    color: #ff9d00;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.nextWorkoutInfo h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.nextDuration {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.startNextBtn {
+    background: #ff9d00;
+    color: #000;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(255, 157, 0, 0.3);
+}
+
+.startNextBtn:hover {
+    transform: scale(1.05);
+    background: #ffb745;
+    box-shadow: 0 6px 20px rgba(255, 157, 0, 0.4);
 }
 
 .historySection {

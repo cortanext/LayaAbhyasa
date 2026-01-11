@@ -37,6 +37,9 @@ function App() {
     const [sessionHistory, setSessionHistory] = useState([]);
     const [isSavingSession, setIsSavingSession] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
+    const [muteBeeps, setMuteBeeps] = useState(() => localStorage.getItem('muteBeeps') === 'true');
+    const [nextWorkoutPending, setNextWorkoutPending] = useState(null);
+    const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
 
     const showToast = (message, type = 'info') => {
         setToast({ message, type });
@@ -46,6 +49,12 @@ function App() {
     const [modalData, setModalData] = useState({ name: '', duration: 60, type: 'gentle', chime: 'gentle' });
     const [editingId, setEditingId] = useState(null);
     const [completedWorkouts, setCompletedWorkouts] = useState([]);
+    const [completedWorkoutDetails, setCompletedWorkoutDetails] = useState([]);
+    const [isResetMode, setIsResetMode] = useState(false);
+    const [resetStep, setResetStep] = useState('request'); // 'request' or 'confirm'
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetCode, setResetCode] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -92,6 +101,62 @@ function App() {
         } catch (err) {
             showToast("Connection error.", "error");
             console.error("Login/Signup error:", err);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    const handleRequestReset = async (e) => {
+        e.preventDefault();
+        setIsSyncing(true);
+        try {
+            const res = await fetch(`${API_URL}/auth/request-reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: resetEmail })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setResetStep('confirm');
+                showToast("Reset code sent! Check server console.", "success");
+            } else {
+                showToast(data.error || "Request failed", "error");
+            }
+        } catch (err) {
+            showToast("Connection error.", "error");
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        setIsSyncing(true);
+        try {
+            const res = await fetch(`${API_URL}/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: resetEmail,
+                    resetCode: resetCode,
+                    newPassword: newPassword
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast("Password reset successful!", "success");
+                setIsResetMode(false);
+                setResetStep('request');
+                setResetEmail('');
+                setResetCode('');
+                setNewPassword('');
+            } else {
+                showToast(data.error || "Reset failed", "error");
+            }
+        } catch (err) {
+            showToast("Connection error.", "error");
         } finally {
             setIsSyncing(false);
         }
@@ -215,6 +280,56 @@ function App() {
         }
     }, [token]);
 
+    const autoSaveSession = async (workoutDetails) => {
+        if (!token || workoutDetails.length === 0) return;
+
+        try {
+            // Get today's date string (YYYY-MM-DD)
+            const today = new Date().toISOString().split('T')[0];
+
+            // Always read from localStorage to get the most current value
+            let sessionId = localStorage.getItem('currentSessionId');
+            const storedDate = localStorage.getItem('currentSessionDate');
+
+            // Reset session if date has changed
+            if (storedDate !== today) {
+                sessionId = null;
+                localStorage.removeItem('currentSessionId');
+                localStorage.removeItem('currentSessionDate');
+                setCurrentSessionId(null);
+            }
+
+            // Generate a new session ID if we don't have one
+            if (!sessionId) {
+                sessionId = `${today}-${Date.now()}`;
+                setCurrentSessionId(sessionId);
+                localStorage.setItem('currentSessionId', sessionId);
+                localStorage.setItem('currentSessionDate', today);
+            }
+
+            console.log('Saving to session:', sessionId); // Debug log
+
+            const res = await fetch(`${API_URL}/api/sessions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    name: `Auto-Saved ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                    workouts: workoutDetails
+                })
+            });
+
+            if (res.ok) {
+                loadSessionHistory(token);
+            }
+        } catch (err) {
+            console.error("Auto-save failed", err);
+        }
+    };
+
     const saveSession = async () => {
         if (completedWorkouts.length === 0) return;
         const sessionName = prompt("Enter session name (e.g., Morning Routine):", `Session ${new Date().toLocaleDateString()}`);
@@ -256,6 +371,10 @@ function App() {
             return;
         }
         setCompletedWorkouts([]);
+        setCompletedWorkoutDetails([]);
+        setCurrentSessionId(null);
+        localStorage.removeItem('currentSessionId');
+        localStorage.removeItem('currentSessionDate');
         showToast("New session started");
     };
 
@@ -286,6 +405,7 @@ function App() {
 
     const startWorkout = (workout) => {
         setActiveWorkout(workout);
+        setNextWorkoutPending(null);
         if ('wakeLock' in navigator) {
             try { navigator.wakeLock.request('screen'); } catch (e) { console.log(e); }
         }
@@ -294,17 +414,23 @@ function App() {
     const stopWorkout = (completedId = null, wasAutoComplete = false) => {
         setActiveWorkout(null);
         if (completedId) {
-            setCompletedWorkouts(prev => [...prev, completedId]);
+            const newCompleted = [...completedWorkouts, completedId];
+            setCompletedWorkouts(newCompleted);
 
-            // Auto-flow logic: find the next workout in the sequence
+            // Add workout details with timestamp
+            const workout = workouts.find(w => w.id === completedId);
+            const workoutDetail = workout ? { ...workout, completedAt: Date.now() } : { id: completedId, name: 'Unknown Workout', duration: 0, completedAt: Date.now() };
+            const newDetails = [...completedWorkoutDetails, workoutDetail];
+            setCompletedWorkoutDetails(newDetails);
+
+            autoSaveSession(newDetails);
+
+            // Manual flow logic: offer the next workout in the sequence
             if (wasAutoComplete) {
                 const currentIndex = workouts.findIndex(w => w.id === completedId);
                 if (currentIndex !== -1 && currentIndex < workouts.length - 1) {
                     const nextWorkout = workouts[currentIndex + 1];
-                    // Briefly wait to show completion before starting next
-                    setTimeout(() => {
-                        startWorkout(nextWorkout);
-                    }, 1500);
+                    setNextWorkoutPending(nextWorkout);
                 }
             }
         }
@@ -413,6 +539,20 @@ function App() {
                             <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
+                            <div className={styles.settingsSection}>
+                                <label className={styles.settingToggle}>
+                                    <input
+                                        type="checkbox"
+                                        checked={muteBeeps}
+                                        onChange={(e) => {
+                                            const val = e.target.checked;
+                                            setMuteBeeps(val);
+                                            localStorage.setItem('muteBeeps', val);
+                                        }}
+                                    />
+                                    <span>Mute Countdown Beeps</span>
+                                </label>
+                            </div>
                         </div>
                         <div className={styles.userControls}>
                             {user ? (() => {
@@ -470,6 +610,21 @@ function App() {
                             </div>
                         </div>
                     </header>
+
+                    {nextWorkoutPending && (
+                        <section className={styles.nextWorkoutSection}>
+                            <div className={styles.nextWorkoutCard}>
+                                <div className={styles.nextWorkoutInfo}>
+                                    <span className={styles.nextLabel}>Next Up</span>
+                                    <h3>{nextWorkoutPending.name}</h3>
+                                    <span className={styles.nextDuration}>{Math.floor(nextWorkoutPending.duration / 60)}m {nextWorkoutPending.duration % 60}s</span>
+                                </div>
+                                <button className={styles.startNextBtn} onClick={() => startWorkout(nextWorkoutPending)}>
+                                    Start Now
+                                </button>
+                            </div>
+                        </section>
+                    )}
 
                     <section className={styles.presetGrid}>
                         {workouts.map((workout) => (
@@ -678,6 +833,13 @@ function App() {
                                             {isSignup ? "Login" : "Sign Up"}
                                         </span>
                                     </p>
+                                    {!isSignup && (
+                                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginTop: '0.5rem', textAlign: 'center' }}>
+                                            <span onClick={() => { setIsLoginOpen(false); setIsResetMode(true); setResetStep('request'); }} style={{ color: '#00ff88', cursor: 'pointer', textDecoration: 'underline' }}>
+                                                Forgot Password?
+                                            </span>
+                                        </p>
+                                    )}
                                 </form>
                             </div>
                         </div>
@@ -774,6 +936,59 @@ function App() {
                             </div>
                         </div>
                     )}
+
+                    {isResetMode && (
+                        <div className={styles.modalOverlay}>
+                            <div className={styles.modalContent}>
+                                <h2>{resetStep === 'request' ? 'Reset Password' : 'Enter Reset Code'}</h2>
+                                {resetStep === 'request' ? (
+                                    <form onSubmit={handleRequestReset}>
+                                        <input
+                                            type="email"
+                                            value={resetEmail}
+                                            onChange={(e) => setResetEmail(e.target.value)}
+                                            required
+                                            placeholder="Email"
+                                        />
+                                        <div className={styles.modalActions}>
+                                            <button type="button" onClick={() => { setIsResetMode(false); setResetEmail(''); }}>Cancel</button>
+                                            <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                                {isSyncing ? "..." : "Send Reset Code"}
+                                            </button>
+                                        </div>
+                                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', marginTop: '1rem', textAlign: 'center' }}>
+                                            Check server console for reset code
+                                        </p>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleResetPassword}>
+                                        <input
+                                            type="text"
+                                            value={resetCode}
+                                            onChange={(e) => setResetCode(e.target.value)}
+                                            required
+                                            placeholder="6-Digit Reset Code"
+                                            maxLength="6"
+                                        />
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                            placeholder="New Password"
+                                            style={{ marginTop: '1rem' }}
+                                        />
+                                        <div className={styles.modalActions}>
+                                            <button type="button" onClick={() => { setResetStep('request'); setResetCode(''); setNewPassword(''); }}>Back</button>
+                                            <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                                {isSyncing ? "..." : "Reset Password"}
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </main>
             ) : (
                 <Timer
@@ -781,6 +996,7 @@ function App() {
                     duration={activeWorkout.duration}
                     beepType={activeWorkout.chime || activeWorkout.type}
                     onComplete={(isManual) => stopWorkout(activeWorkout.id, !isManual)}
+                    muteBeeps={muteBeeps}
                 />
             )
             }
