@@ -71,6 +71,7 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
         <div className={styles.container}>
             <img src="/logo.png" alt="Flow Laya Logo" className={styles.timerLogo} />
             <div className={styles.timerCircle}>
+                <div className={styles.timerBgImage} style={{ backgroundImage: 'url(/timer-bg.png)' }}></div>
                 <svg viewBox="0 0 36 36" className={styles.circularChart}>
                     <path
                         className={styles.circleBg}
@@ -94,8 +95,11 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
 
             <h2 className={styles.workoutName}>{workoutName}</h2>
 
-            <button className={styles.stopButton} onClick={() => onComplete(true)}>
-                Stop
+            <button className={styles.stopButton} onClick={() => onComplete(true)} title="Stop Workout">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
         </div>
     );
