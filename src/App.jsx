@@ -704,7 +704,7 @@ function App() {
                 <main className={styles.dashboard}>
                     <header className={styles.header}>
                         <div className={styles.titleSection}>
-                            <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto', marginBottom: '1rem' }} />
+                            <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto', marginBottom: '0.5rem' }} />
                             <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
