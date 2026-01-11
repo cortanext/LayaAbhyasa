@@ -2,6 +2,40 @@ import { useState, useEffect } from 'react';
 import Timer from './components/timer/Timer';
 import styles from './App.module.css';
 
+const WORKOUT_TEMPLATES = {
+    "15min": [
+        { id: 't1-1', name: 'Warm Up', duration: 180, type: 'gentle', chime: 'gentle' },
+        { id: 't1-2', name: 'Main Flow', duration: 420, type: 'active', chime: 'high' },
+        { id: 't1-3', name: 'Cool Down', duration: 300, type: 'gentle', chime: 'gentle' }
+    ],
+    "30min": [
+        { id: 't2-1', name: 'Sun Salutations', duration: 300, type: 'gentle', chime: 'gentle' },
+        { id: 't2-2', name: 'Standing Poses', duration: 600, type: 'active', chime: 'high' },
+        { id: 't2-3', name: 'Balance Flow', duration: 600, type: 'active', chime: 'high' },
+        { id: 't2-4', name: 'Savasana', duration: 300, type: 'gentle', chime: 'gentle' }
+    ],
+    "30min_yoga": [
+        { id: 't3-1', name: 'Centering', duration: 300, type: 'gentle', chime: 'gentle' },
+        { id: 't3-2', name: 'Gentle Flow', duration: 900, type: 'gentle', chime: 'gentle' },
+        { id: 't3-3', name: 'Deep Stretch', duration: 600, type: 'gentle', chime: 'gentle' }
+    ],
+    "45min": [
+        { id: 't4-1', name: 'Pranayama', duration: 300, type: 'gentle', chime: 'gentle' },
+        { id: 't4-2', name: 'Warm Up Vinyasa', duration: 600, type: 'active', chime: 'high' },
+        { id: 't4-3', name: 'Core Work', duration: 600, type: 'active', chime: 'high' },
+        { id: 't4-4', name: 'Peak Poses', duration: 900, type: 'active', chime: 'high' },
+        { id: 't4-5', name: 'Relaxation', duration: 300, type: 'gentle', chime: 'gentle' }
+    ],
+    "60min": [
+        { id: 't5-1', name: 'Meditation', duration: 300, type: 'gentle', chime: 'gentle' },
+        { id: 't5-2', name: 'Warm Up', duration: 600, type: 'active', chime: 'high' },
+        { id: 't5-3', name: 'Flow Sequence 1', duration: 900, type: 'active', chime: 'high' },
+        { id: 't5-4', name: 'Flow Sequence 2', duration: 900, type: 'active', chime: 'high' },
+        { id: 't5-5', name: 'Floor Work', duration: 600, type: 'gentle', chime: 'gentle' },
+        { id: 't5-6', name: 'Savasana', duration: 300, type: 'gentle', chime: 'gentle' }
+    ]
+};
+
 const DEFAULT_PRESETS = [
     { id: 1, name: 'Breathe', duration: 120, type: 'gentle', chime: 'gentle' },
     { id: 2, name: 'Cat-Cow', duration: 60, type: 'gentle', chime: 'gentle' },
@@ -26,10 +60,12 @@ function App() {
     const [isSignup, setIsSignup] = useState(false);
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [signupAgeRange, setSignupAgeRange] = useState('');
     const [signupGender, setSignupGender] = useState('');
     const [signupZip, setSignupZip] = useState('');
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [signupDisplayName, setSignupDisplayName] = useState('');
+    const [userRank, setUserRank] = useState(null);
     const [isSyncing, setIsSyncing] = useState(false);
     const [toast, setToast] = useState({ message: '', type: null });
     const [workouts, setWorkouts] = useState(DEFAULT_PRESETS);
@@ -40,6 +76,9 @@ function App() {
     const [muteBeeps, setMuteBeeps] = useState(() => localStorage.getItem('muteBeeps') === 'true');
     const [nextWorkoutPending, setNextWorkoutPending] = useState(null);
     const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
+    // Cache for User's "Actual" Template (Custom Routine)
+    const [savedCustomWorkouts, setSavedCustomWorkouts] = useState(null);
+    const [statsTimeframe, setStatsTimeframe] = useState('week');
 
     const showToast = (message, type = 'info') => {
         setToast({ message, type });
@@ -70,7 +109,8 @@ function App() {
                     password: loginPassword,
                     age_range: isSignup ? signupAgeRange : undefined,
                     gender: isSignup ? signupGender : undefined,
-                    zip: isSignup ? signupZip : undefined
+                    zip: isSignup ? signupZip : undefined,
+                    display_name: isSignup ? signupDisplayName : undefined
                 })
             });
             const data = await res.json();
@@ -86,8 +126,10 @@ function App() {
                 setSignupAgeRange('');
                 setSignupGender('');
                 setSignupZip('');
+                setSignupDisplayName('');
                 showToast("Login successful!", "success");
                 loadWorkouts(data.token);
+                fetchUserRank(data.token);
             } else if (data.success && isSignup) {
                 showToast("Signup successful! Please login.", "success");
                 setIsSignup(false);
@@ -95,6 +137,7 @@ function App() {
                 setSignupAgeRange('');
                 setSignupGender('');
                 setSignupZip('');
+                setSignupDisplayName('');
             } else {
                 showToast(data.error || "Login failed", "error");
             }
@@ -175,7 +218,8 @@ function App() {
                 body: JSON.stringify({
                     age_range: signupAgeRange,
                     gender: signupGender,
-                    zip: signupZip
+                    zip: signupZip,
+                    display_name: signupDisplayName
                 })
             });
 
@@ -184,7 +228,8 @@ function App() {
                     ...user,
                     age_range: signupAgeRange,
                     gender: signupGender,
-                    zip: signupZip
+                    zip: signupZip,
+                    display_name: signupDisplayName
                 };
                 setUser(updatedUser);
                 localStorage.setItem('currentUser', JSON.stringify(updatedUser));
@@ -192,7 +237,7 @@ function App() {
                 showToast("Profile updated successfully!", "success");
             } else {
                 const data = await res.json();
-                showToast(data.error || "Update failed", "error");
+                showToast(data.error || "Failed to update profile", "error");
             }
         } catch (err) {
             console.error("Profile update error:", err);
@@ -219,7 +264,9 @@ function App() {
             });
             if (res.ok) {
                 const data = await res.json();
-                setWorkouts(data.length > 0 ? data : DEFAULT_PRESETS);
+                const loaded = data.length > 0 ? data : DEFAULT_PRESETS;
+                setWorkouts(loaded);
+                setSavedCustomWorkouts(loaded); // Initialize custom cache
             } else {
                 const errorData = await res.json().catch(() => ({}));
                 console.error("Load failed:", res.status, errorData);
@@ -259,6 +306,38 @@ function App() {
         }
     };
 
+    const selectTemplate = (templateKey) => {
+        if (!templateKey) return;
+
+        // Only confirm if user has actually done some work in current session
+        if (completedWorkouts.length > 0 && !confirm("This will replace your current workout list. Continue?")) {
+            return;
+        }
+
+        if (templateKey === 'custom') {
+            if (savedCustomWorkouts) {
+                setWorkouts(savedCustomWorkouts);
+                if (token) saveWorkoutsToCloud(savedCustomWorkouts);
+                showToast("Custom routine restored!", "success");
+            } else {
+                showToast("No custom routine saved.", "error");
+            }
+            return;
+        }
+
+        const template = WORKOUT_TEMPLATES[templateKey];
+        if (template) {
+            // Generate unique IDs for the template items to avoid conflicts
+            const newWorkouts = template.map(item => ({
+                ...item,
+                id: Date.now() + Math.random() // Ensure unique ID
+            }));
+            setWorkouts(newWorkouts);
+            if (token) saveWorkoutsToCloud(newWorkouts);
+            showToast("Template loaded!", "success");
+        }
+    };
+
     const loadSessionHistory = async (token) => {
         try {
             const res = await fetch(`${API_URL}/api/sessions`, {
@@ -267,9 +346,25 @@ function App() {
             if (res.ok) {
                 const data = await res.json();
                 setSessionHistory(data);
+                fetchUserRank(token);
             }
         } catch (err) {
             console.error("Failed to load session history", err);
+        }
+    };
+
+    const fetchUserRank = async (authToken) => {
+        if (!authToken) return;
+        try {
+            const res = await fetch(`${API_URL}/api/user-rank`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUserRank(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch user rank", err);
         }
     };
 
@@ -469,6 +564,7 @@ function App() {
         }
 
         setWorkouts(updated);
+        setSavedCustomWorkouts(updated); // Update custom cache on edit
         if (token) {
             saveWorkoutsToCloud(updated);
         }
@@ -479,6 +575,7 @@ function App() {
         e.stopPropagation();
         const updated = workouts.filter(w => w.id !== id);
         setWorkouts(updated);
+        setSavedCustomWorkouts(updated); // Update custom cache on delete
         if (token) {
             saveWorkoutsToCloud(updated);
         }
@@ -487,17 +584,60 @@ function App() {
     const totalDurationSeconds = workouts.reduce((acc, curr) => acc + curr.duration, 0);
     const totalDurationMinutes = Math.round(totalDurationSeconds / 60);
 
+    const getChartData = () => {
+        const days = statsTimeframe === 'week' ? 7 : 30;
+        const data = [];
+        const now = new Date();
+        now.setHours(23, 59, 59, 999);
+
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toLocaleDateString();
+
+            // Filter sessions for this day
+            const daySessions = sessionHistory.filter(s => {
+                const sDate = new Date(parseInt(s.session_id));
+                return sDate.toLocaleDateString() === dateStr;
+            });
+
+            const totalMinutes = daySessions.reduce((acc, s) => {
+                const sessionMins = s.workouts.reduce((wAcc, w) => wAcc + (w.duration || 0), 0) / 60;
+                return acc + sessionMins;
+            }, 0);
+
+            data.push({
+                label: days === 7 ? d.toLocaleDateString(undefined, { weekday: 'short' }) : d.getDate(),
+                fullDate: dateStr,
+                value: Math.round(totalMinutes)
+            });
+        }
+
+        const maxValue = Math.max(...data.map(d => d.value), 1);
+        return data.map(d => ({
+            ...d,
+            height: `${(d.value / maxValue) * 100}%`
+        }));
+    };
+
     const handleExport = () => {
-        const dataStr = JSON.stringify(workouts, null, 2);
+        const exportData = {
+            workouts: workouts,
+            sessionHistory: sessionHistory,
+            exportDate: new Date().toISOString(),
+            version: "1.1"
+        };
+        const dataStr = JSON.stringify(exportData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'my-workouts.json';
+        link.download = `flow-laya-backup-${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        showToast("Backup exported!", "success");
     };
 
     const handleImport = (e) => {
@@ -507,8 +647,20 @@ function App() {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const importedWorkouts = JSON.parse(event.target.result);
-                if (Array.isArray(importedWorkouts)) {
+                const importedData = JSON.parse(event.target.result);
+                let importedWorkouts = [];
+
+                if (Array.isArray(importedData)) {
+                    // Legacy format: just an array of workouts
+                    importedWorkouts = importedData;
+                } else if (importedData && typeof importedData === 'object' && importedData.workouts) {
+                    // New format: object with workouts and potentially sessionHistory
+                    importedWorkouts = importedData.workouts;
+                    // Note: We currently only import workouts as per user request, 
+                    // but we have sessionHistory in the file for future or manual use.
+                }
+
+                if (importedWorkouts.length > 0) {
                     const merged = [...workouts];
                     importedWorkouts.forEach(imported => {
                         if (!merged.find(w => w.id === imported.id)) {
@@ -518,7 +670,11 @@ function App() {
                         }
                     });
                     setWorkouts(merged);
+                    setSavedCustomWorkouts(merged); // Update custom cache on import
                     if (token) saveWorkoutsToCloud(merged);
+                    showToast("Workouts imported!", "success");
+                } else {
+                    showToast("No workouts found in file.", "error");
                 }
             } catch (err) {
                 console.error("Import failed", err);
@@ -540,6 +696,32 @@ function App() {
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
                             <div className={styles.settingsSection}>
+                                {user && (
+                                    <select
+                                        onChange={(e) => selectTemplate(e.target.value)}
+                                        style={{
+                                            padding: '0.4rem 0.8rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(123, 47, 247, 0.3)',
+                                            background: 'rgba(123, 47, 247, 0.15)',
+                                            color: '#7b2ff7',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            outline: 'none',
+                                            fontWeight: '600'
+                                        }}
+                                        defaultValue=""
+                                    >
+                                        <option value="" disabled>Load Template...</option>
+                                        <option value="custom">My Custom Routine</option>
+                                        <option disabled>──────────</option>
+                                        <option value="15min">15 Minute Quick Session</option>
+                                        <option value="30min">30 Minute Standard Session</option>
+                                        <option value="30min_yoga">30 Minute Yoga Flow</option>
+                                        <option value="45min">45 Minute Extended Session</option>
+                                        <option value="60min">1 Hour Full Practice</option>
+                                    </select>
+                                )}
                                 <label className={styles.settingToggle}>
                                     <input
                                         type="checkbox"
@@ -571,10 +753,18 @@ function App() {
                                     <div
                                         className={styles.userInfo}
                                         style={{
-                                            background: `linear-gradient(to right, rgba(0, 255, 136, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)`,
-                                            border: `1px solid rgba(0, 255, 136, ${score / 200 + 0.1})`
+                                            background: score > 0 ? `linear-gradient(to right, rgba(123, 47, 247, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)` : 'rgba(0, 0, 0, 0.02)',
+                                            border: `1px solid rgba(123, 47, 247, ${score / 200 + 0.1})`
                                         }}
                                     >
+                                        <div className={styles.userMainInfo}>
+                                            <span style={{ fontWeight: 600, color: '#7b2ff7' }}>{user.display_name || email}</span>
+                                            {userRank && (
+                                                <div className={styles.rankBadge}>
+                                                    Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className={styles.profileCompleteness}>
                                             <div className={styles.completenessBadge} title="Profile Completeness">
                                                 {score}% Complete {score < 100 && (
@@ -610,6 +800,8 @@ function App() {
                             </div>
                         </div>
                     </header>
+
+
 
                     {nextWorkoutPending && (
                         <section className={styles.nextWorkoutSection}>
@@ -685,6 +877,40 @@ function App() {
                             </div>
                         </div>
                     </section>
+
+                    {user && (
+                        <section className={styles.statsChartSection}>
+                            <div className={styles.chartHeader}>
+                                <h3>Your Activity</h3>
+                                <div className={styles.timeframeToggle}>
+                                    <button
+                                        className={`${styles.timeframeBtn} ${statsTimeframe === 'week' ? styles.timeframeBtnActive : ''}`}
+                                        onClick={() => setStatsTimeframe('week')}
+                                    >
+                                        Week
+                                    </button>
+                                    <button
+                                        className={`${styles.timeframeBtn} ${statsTimeframe === 'month' ? styles.timeframeBtnActive : ''}`}
+                                        onClick={() => setStatsTimeframe('month')}
+                                    >
+                                        Month
+                                    </button>
+                                </div>
+                            </div>
+                            <div className={styles.chartContainer}>
+                                {getChartData().map((d, idx) => (
+                                    <div key={idx} className={styles.chartBarGroup}>
+                                        <div
+                                            className={styles.chartBar}
+                                            style={{ height: d.height }}
+                                            data-value={d.value}
+                                        />
+                                        <span className={styles.chartLabel}>{d.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {token && sessionHistory.length > 0 && (
                         <section className={styles.historySection}>
@@ -788,10 +1014,18 @@ function App() {
                                     />
                                     {isSignup && (
                                         <>
+                                            <input
+                                                type="text"
+                                                value={signupDisplayName}
+                                                onChange={(e) => setSignupDisplayName(e.target.value)}
+                                                placeholder="Unique Display Name"
+                                                required
+                                                style={{ marginTop: '1rem' }}
+                                            />
                                             <select
                                                 value={signupAgeRange}
                                                 onChange={(e) => setSignupAgeRange(e.target.value)}
-                                                style={{ marginTop: '1rem', width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                style={{ marginTop: '1rem' }}
                                             >
                                                 <option value="">Age Range (Optional)</option>
                                                 <option value="<18">&lt;18</option>
@@ -804,7 +1038,7 @@ function App() {
                                             <select
                                                 value={signupGender}
                                                 onChange={(e) => setSignupGender(e.target.value)}
-                                                style={{ marginTop: '1rem', width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+                                                style={{ marginTop: '1rem' }}
                                             >
                                                 <option value="">Gender (Optional)</option>
                                                 <option value="male">Male</option>
@@ -827,19 +1061,21 @@ function App() {
                                             {isSyncing ? "..." : (isSignup ? "Sign Up" : "Login")}
                                         </button>
                                     </div>
-                                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
-                                        {isSignup ? "Already have an account?" : "No account yet?"}{" "}
-                                        <span onClick={() => setIsSignup(!isSignup)} style={{ color: '#00ff88', cursor: 'pointer', textDecoration: 'underline' }}>
-                                            {isSignup ? "Login" : "Sign Up"}
-                                        </span>
-                                    </p>
-                                    {!isSignup && (
-                                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginTop: '0.5rem', textAlign: 'center' }}>
-                                            <span onClick={() => { setIsLoginOpen(false); setIsResetMode(true); setResetStep('request'); }} style={{ color: '#00ff88', cursor: 'pointer', textDecoration: 'underline' }}>
-                                                Forgot Password?
+                                    <div className={styles.authLinksContainer}>
+                                        <p>
+                                            {isSignup ? "Already have an account?" : "No account yet?"}{" "}
+                                            <span onClick={() => setIsSignup(!isSignup)}>
+                                                {isSignup ? "Login" : "Sign Up"}
                                             </span>
                                         </p>
-                                    )}
+                                        {!isSignup && (
+                                            <p>
+                                                <span onClick={() => { setIsLoginOpen(false); setIsResetMode(true); setResetStep('request'); }}>
+                                                    Forgot Password?
+                                                </span>
+                                            </p>
+                                        )}
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -850,10 +1086,20 @@ function App() {
                             <div className={styles.modalContent}>
                                 <h2>Update Profile</h2>
                                 <form onSubmit={handleUpdateProfile}>
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <label style={{ fontSize: '0.8rem', color: 'rgba(0,0,0,0.6)', marginLeft: '4px' }}>Display Name (Unique)</label>
+                                        <input
+                                            type="text"
+                                            value={signupDisplayName}
+                                            onChange={(e) => setSignupDisplayName(e.target.value)}
+                                            placeholder="Display Name"
+                                            style={{ marginTop: '0.3rem', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
+                                        />
+                                    </div>
                                     <select
                                         value={signupAgeRange}
                                         onChange={(e) => setSignupAgeRange(e.target.value)}
-                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', background: 'black', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
                                     >
                                         <option value="">Age Range (Optional)</option>
                                         <option value="<18">&lt;18</option>
@@ -866,7 +1112,7 @@ function App() {
                                     <select
                                         value={signupGender}
                                         onChange={(e) => setSignupGender(e.target.value)}
-                                        style={{ marginTop: '1rem', width: '100%', padding: '0.8rem', borderRadius: '10px', background: 'black', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+                                        style={{ marginTop: '1rem', width: '100%', padding: '0.8rem', borderRadius: '10px', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
                                     >
                                         <option value="">Gender (Optional)</option>
                                         <option value="male">Male</option>

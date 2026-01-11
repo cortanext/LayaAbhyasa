@@ -62,6 +62,9 @@
 
 .settingsSection {
     margin-top: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
 }
 
 .settingToggle {
@@ -105,13 +108,32 @@
 
 .userInfo {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: #1a1a1a;
-    font-size: 0.9rem;
-    padding: 8px 18px;
-    border-radius: 20px;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.2rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+}
+
+.userMainInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.rankBadge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ff9d00;
+    background: rgba(255, 157, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    width: fit-content;
+    border: 1px solid rgba(255, 157, 0, 0.2);
+    margin-top: 2px;
 }
 
 .profileCompleteness {
@@ -122,7 +144,7 @@
 
 .completenessBadge {
     font-size: 0.65rem;
-    color: #00ff88;
+    color: #7b2ff7;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -134,7 +156,7 @@
 }
 
 .completeNow {
-    color: #00cbff;
+    color: #7b2ff7;
     text-decoration: underline;
     cursor: pointer;
     margin-left: 10px;
@@ -151,23 +173,25 @@
 }
 
 .portBtn {
-    background: transparent;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    color: rgba(0, 0, 0, 0.4);
-    padding: 0.3rem 0.6rem;
+    background: rgba(123, 47, 247, 0.1);
+    border: 1px solid rgba(123, 47, 247, 0.2);
+    color: #7b2ff7;
+    padding: 0.35rem 0.8rem;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.75rem;
+    font-weight: 600;
     transition: all 0.2s;
     display: flex;
     align-items: center;
+    gap: 0.4rem;
 }
 
 .portBtn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #000;
-    border-color: rgba(0, 0, 0, 0.3);
+    background: rgba(123, 47, 247, 0.2);
+    color: #7b2ff7;
+    border-color: rgba(123, 47, 247, 0.4);
+    transform: translateY(-1px);
 }
 
 .authBtn {
@@ -520,6 +544,12 @@
     .presetGrid {
         grid-template-columns: 1fr !important;
     }
+
+    .settingsSection {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        width: 100%;
+    }
 }
 
 .detailDuration {
@@ -678,6 +708,114 @@
     background: rgba(255, 157, 0, 0.05);
 }
 
+.statsChartSection {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #fcfcfc;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.chartHeader h3 {
+    font-size: 1.1rem;
+    color: #1a1a1a;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.timeframeToggle {
+    display: flex;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.timeframeBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #4a4a4a;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timeframeBtnActive {
+    background: #7b2ff7;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(123, 47, 247, 0.3);
+}
+
+.chartContainer {
+    display: flex;
+    align-items: flex-end;
+    height: 180px;
+    gap: 8px;
+    padding-bottom: 25px;
+    position: relative;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chartBarGroup {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.chartBar {
+    width: 60%;
+    min-width: 8px;
+    max-width: 30px;
+    background: linear-gradient(to top, #7b2ff7, #a594f9);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    cursor: pointer;
+}
+
+.chartBar:hover {
+    filter: brightness(1.1);
+}
+
+.chartBar:hover::after {
+    content: attr(data-value) 'm';
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.chartLabel {
+    position: absolute;
+    bottom: -22px;
+    font-size: 0.65rem;
+    color: rgba(0, 0, 0, 0.4);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
 /* Modal */
 .modalOverlay {
     position: fixed;
@@ -717,6 +855,26 @@
     color: #1a1a1a;
     font-size: 1rem;
     margin-top: 0.5rem;
+}
+
+.authLinksContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 0.8rem;
+}
+
+.authLinksContainer span {
+    color: #00ff88;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.authLinksContainer span:hover {
+    color: #ff9d00;
 }
 
 .formRow {
