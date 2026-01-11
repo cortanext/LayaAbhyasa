@@ -210,6 +210,26 @@
     box-shadow: 0 0 10px rgba(123, 47, 247, 0.2);
 }
 
+.logoutBtn {
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    align-self: flex-end;
+}
+
+.logoutBtn:hover {
+    color: #ff5555;
+    background: rgba(255, 85, 85, 0.05);
+    border-radius: 4px;
+}
+
 .statsSection {
     margin-top: 2rem;
     padding: 1.5rem;

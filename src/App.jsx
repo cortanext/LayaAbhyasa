@@ -767,24 +767,23 @@ function App() {
                                         </div>
                                         <div className={styles.profileCompleteness}>
                                             <div className={styles.completenessBadge} title="Profile Completeness">
-                                                {score}% Complete {score < 100 && (
-                                                    <span
-                                                        className={styles.completeNow}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSignupAgeRange(user.age_range || '');
-                                                            setSignupGender(user.gender || '');
-                                                            setSignupZip(user.zip || '');
-                                                            setIsProfileModalOpen(true);
-                                                        }}
-                                                    >
-                                                        Complete Now
-                                                    </span>
-                                                )}
+                                                {score}% Complete
+                                                <span
+                                                    className={styles.completeNow}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSignupAgeRange(user.age_range || '');
+                                                        setSignupGender(user.gender || '');
+                                                        setSignupZip(user.zip || '');
+                                                        setSignupDisplayName(user.display_name || '');
+                                                        setIsProfileModalOpen(true);
+                                                    }}
+                                                >
+                                                    {score < 100 ? "Complete Now" : "Edit Profile"}
+                                                </span>
                                             </div>
-                                            <span>{email}</span>
                                         </div>
-                                        <button onClick={handleLogout} className={styles.authBtn}>Logout</button>
+                                        <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
                                     </div>
                                 );
                             })() : (
