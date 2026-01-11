@@ -74,7 +74,7 @@ const Timer = ({ workoutName, duration, beepType, onComplete, muteBeeps }) => {
                 <div className={styles.timerBgImage} style={{ backgroundImage: 'url(/timer-bg.png)' }}></div>
                 <svg viewBox="0 0 36 36" className={styles.circularChart}>
                     <defs>
-                        <path id="curvePath" d="M 5,18 A 13,13 0 0 1 31,18" />
+                        <path id="curvePath" d="M 7,18 A 11,11 0 0 1 29,18" />
                     </defs>
                     <path
                         className={styles.circleBg}

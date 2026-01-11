@@ -75,10 +75,11 @@
 }
 
 .curvedText {
-    font-size: 3.5px;
+    font-size: 3.2px;
     font-weight: 800;
     fill: #7b2ff7;
     letter-spacing: 0.1px;
+    text-transform: uppercase;
 }
 
 .stopButton {
