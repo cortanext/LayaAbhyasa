@@ -3,9 +3,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    min-height: 100%;
+    width: 100%;
+    min-height: 100vh;
     padding: 2rem 0;
     animation: fadeIn 0.5s ease;
+    box-sizing: border-box;
 }
 
 .timerLogo {
