@@ -695,47 +695,8 @@ function App() {
                             <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             <div className={styles.subtitle}>Practice in rhythm</div>
                             <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
-                            <div className={styles.settingsSection}>
-                                {user && (
-                                    <select
-                                        onChange={(e) => selectTemplate(e.target.value)}
-                                        style={{
-                                            padding: '0.4rem 0.8rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid rgba(123, 47, 247, 0.3)',
-                                            background: 'rgba(123, 47, 247, 0.15)',
-                                            color: '#7b2ff7',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            outline: 'none',
-                                            fontWeight: '600'
-                                        }}
-                                        defaultValue=""
-                                    >
-                                        <option value="" disabled>Load Template...</option>
-                                        <option value="custom">My Custom Routine</option>
-                                        <option disabled>──────────</option>
-                                        <option value="15min">15 Minute Quick Session</option>
-                                        <option value="30min">30 Minute Standard Session</option>
-                                        <option value="30min_yoga">30 Minute Yoga Flow</option>
-                                        <option value="45min">45 Minute Extended Session</option>
-                                        <option value="60min">1 Hour Full Practice</option>
-                                    </select>
-                                )}
-                                <label className={styles.settingToggle}>
-                                    <input
-                                        type="checkbox"
-                                        checked={muteBeeps}
-                                        onChange={(e) => {
-                                            const val = e.target.checked;
-                                            setMuteBeeps(val);
-                                            localStorage.setItem('muteBeeps', val);
-                                        }}
-                                    />
-                                    <span>Mute Countdown Beeps</span>
-                                </label>
-                            </div>
                         </div>
+
                         <div className={styles.userControls}>
                             {user ? (() => {
                                 const email = typeof user === 'object' ? user?.email : user;
@@ -797,6 +758,47 @@ function App() {
                                     <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
                                 </label>
                             </div>
+                        </div>
+
+                        <div className={styles.settingsSection}>
+                            {user && (
+                                <select
+                                    onChange={(e) => selectTemplate(e.target.value)}
+                                    style={{
+                                        padding: '0.4rem 0.8rem',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(123, 47, 247, 0.3)',
+                                        background: 'rgba(123, 47, 247, 0.15)',
+                                        color: '#7b2ff7',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                        fontWeight: '600'
+                                    }}
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Load Template...</option>
+                                    <option value="custom">My Custom Routine</option>
+                                    <option disabled>──────────</option>
+                                    <option value="15min">15 Minute Quick Session</option>
+                                    <option value="30min">30 Minute Standard Session</option>
+                                    <option value="30min_yoga">30 Minute Yoga Flow</option>
+                                    <option value="45min">45 Minute Extended Session</option>
+                                    <option value="60min">1 Hour Full Practice</option>
+                                </select>
+                            )}
+                            <label className={styles.settingToggle}>
+                                <input
+                                    type="checkbox"
+                                    checked={muteBeeps}
+                                    onChange={(e) => {
+                                        const val = e.target.checked;
+                                        setMuteBeeps(val);
+                                        localStorage.setItem('muteBeeps', val);
+                                    }}
+                                />
+                                <span>Mute Countdown Beeps</span>
+                            </label>
                         </div>
                     </header>
 
