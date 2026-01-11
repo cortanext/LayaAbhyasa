@@ -61,10 +61,10 @@
 }
 
 .totalTime {
-    color: rgba(0, 0, 0, 0.4);
-    font-size: 0.8rem;
-    margin-top: -2px;
-    font-weight: 600;
+    color: #7b2ff7;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-left: auto;
 }
 
 .settingsSection {

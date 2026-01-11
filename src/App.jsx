@@ -709,7 +709,6 @@ function App() {
                                 <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             </div>
                             <div className={styles.subtitle}>Practice in rhythm</div>
-                            <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
                         </div>
 
                         <div className={styles.userControls}>
@@ -822,6 +821,7 @@ function App() {
                                 />
                                 <span>Mute Countdown Beeps</span>
                             </label>
+                            <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
                         </div>
                     </header>
 
