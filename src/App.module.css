@@ -716,6 +716,39 @@
     background: rgba(0, 203, 255, 0.1);
 }
 
+.reorderGroup {
+    display: flex;
+    gap: 2px;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 2px;
+    border-radius: 12px;
+}
+
+.reorderBtn {
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    line-height: 1;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reorderBtn:hover:not(:disabled) {
+    color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.1);
+}
+
+.reorderBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.1;
+}
+
 .addCard {
     background: #fcfcfc;
     border: 2px dashed rgba(0, 0, 0, 0.1);

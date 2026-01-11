@@ -498,6 +498,19 @@ function App() {
         }
     };
 
+    const moveWorkout = (e, index, direction) => {
+        e.stopPropagation();
+        const newWorkouts = [...workouts];
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= newWorkouts.length) return;
+
+        [newWorkouts[index], newWorkouts[newIndex]] = [newWorkouts[newIndex], newWorkouts[index]];
+        setWorkouts(newWorkouts);
+        setSavedCustomWorkouts(newWorkouts);
+        if (token) saveWorkoutsToCloud(newWorkouts);
+        showToast("Order updated", "success");
+    };
+
     const startWorkout = (workout) => {
         setActiveWorkout(workout);
         setNextWorkoutPending(null);
@@ -820,7 +833,7 @@ function App() {
                     )}
 
                     <section className={styles.presetGrid}>
-                        {workouts.map((workout) => (
+                        {workouts.map((workout, index) => (
                             <div
                                 key={workout.id}
                                 className={`
@@ -831,6 +844,22 @@ function App() {
                                 onClick={() => startWorkout(workout)}
                             >
                                 <div className={styles.cardActions}>
+                                    <div className={styles.reorderGroup}>
+                                        <button
+                                            className={styles.reorderBtn}
+                                            onClick={(e) => moveWorkout(e, index, -1)}
+                                            disabled={index === 0}
+                                        >
+                                            ‹
+                                        </button>
+                                        <button
+                                            className={styles.reorderBtn}
+                                            onClick={(e) => moveWorkout(e, index, 1)}
+                                            disabled={index === workouts.length - 1}
+                                        >
+                                            ›
+                                        </button>
+                                    </div>
                                     <button className={styles.editBtn} onClick={(e) => startEditing(e, workout)}>✎</button>
                                     <button className={styles.deleteBtn} onClick={(e) => deleteWorkout(e, workout.id)}>×</button>
                                 </div>
