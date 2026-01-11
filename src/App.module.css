@@ -758,7 +758,7 @@
 .deleteBtn {
     background: transparent;
     border: none;
-    color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.5);
     font-size: 1rem;
     cursor: pointer;
     padding: 5px;
@@ -769,12 +769,12 @@
 
 .deleteBtn:hover {
     color: #ff5555;
-    background: rgba(255, 0, 0, 0.1);
+    background: rgba(255, 0, 0, 0.15);
 }
 
 .editBtn:hover {
-    color: #00cbff;
-    background: rgba(0, 203, 255, 0.1);
+    color: #0088ff;
+    background: rgba(0, 136, 255, 0.15);
 }
 
 .reorderGroup {
@@ -788,7 +788,7 @@
 .reorderBtn {
     background: transparent;
     border: none;
-    color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.5);
     font-size: 1.2rem;
     cursor: pointer;
     padding: 2px 8px;
@@ -802,7 +802,7 @@
 
 .reorderBtn:hover:not(:disabled) {
     color: #7b2ff7;
-    background: rgba(123, 47, 247, 0.1);
+    background: rgba(123, 47, 247, 0.15);
 }
 
 .reorderBtn:disabled {
