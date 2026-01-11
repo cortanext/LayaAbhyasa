@@ -1093,13 +1093,12 @@ function App() {
                                             value={signupDisplayName}
                                             onChange={(e) => setSignupDisplayName(e.target.value)}
                                             placeholder="Display Name"
-                                            style={{ marginTop: '0.3rem', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
+                                            style={{ marginTop: '0.3rem' }}
                                         />
                                     </div>
                                     <select
                                         value={signupAgeRange}
                                         onChange={(e) => setSignupAgeRange(e.target.value)}
-                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
                                     >
                                         <option value="">Age Range (Optional)</option>
                                         <option value="<18">&lt;18</option>
@@ -1112,7 +1111,7 @@ function App() {
                                     <select
                                         value={signupGender}
                                         onChange={(e) => setSignupGender(e.target.value)}
-                                        style={{ marginTop: '1rem', width: '100%', padding: '0.8rem', borderRadius: '10px', background: '#f8f8f8', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}
+                                        style={{ marginTop: '1rem' }}
                                     >
                                         <option value="">Gender (Optional)</option>
                                         <option value="male">Male</option>

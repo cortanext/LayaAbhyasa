@@ -20,7 +20,7 @@
 .title {
     font-size: 3rem;
     margin-bottom: 0;
-    background: linear-gradient(to right, #ff9d00, #7b2ff7);
+    background: linear-gradient(to right, #7b2ff7, #a594f9);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -31,7 +31,7 @@
 .syncing {
     display: inline-block;
     font-size: 1.5rem;
-    color: #ff9d00;
+    color: #7b2ff7;
     animation: spin 1s linear infinite;
     -webkit-text-fill-color: initial;
     background: none;
@@ -79,7 +79,7 @@
 
 .settingToggle input {
     cursor: pointer;
-    accent-color: #ff9d00;
+    accent-color: #7b2ff7;
 }
 
 .appLogo {
@@ -126,13 +126,13 @@
 .rankBadge {
     font-size: 0.7rem;
     font-weight: 700;
-    color: #ff9d00;
-    background: rgba(255, 157, 0, 0.1);
+    color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.1);
     padding: 2px 8px;
     border-radius: 8px;
     display: inline-block;
     width: fit-content;
-    border: 1px solid rgba(255, 157, 0, 0.2);
+    border: 1px solid rgba(123, 47, 247, 0.2);
     margin-top: 2px;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .completeNow:hover {
-    color: #ff9d00;
+    color: #a594f9;
 }
 
 .portability {
@@ -196,8 +196,8 @@
 
 .authBtn {
     background: transparent;
-    border: 1px solid rgba(255, 157, 0, 0.5);
-    color: #ff9d00;
+    border: 1px solid rgba(123, 47, 247, 0.5);
+    color: #7b2ff7;
     padding: 0.5rem 1rem;
     border-radius: 20px;
     cursor: pointer;
@@ -206,8 +206,8 @@
 }
 
 .authBtn:hover {
-    background: rgba(255, 157, 0, 0.1);
-    box-shadow: 0 0 10px rgba(255, 157, 0, 0.2);
+    background: rgba(123, 47, 247, 0.1);
+    box-shadow: 0 0 10px rgba(123, 47, 247, 0.2);
 }
 
 .statsSection {
@@ -234,7 +234,7 @@
 .statValue {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #ff9d00;
+    color: #7b2ff7;
 }
 
 .statLabel {
@@ -252,9 +252,9 @@
 }
 
 .sessionBtn {
-    background: rgba(255, 157, 0, 0.1);
-    border: 1px solid rgba(255, 157, 0, 0.2);
-    color: #ff9d00;
+    background: rgba(123, 47, 247, 0.1);
+    border: 1px solid rgba(123, 47, 247, 0.2);
+    color: #7b2ff7;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.75rem;
@@ -263,8 +263,8 @@
 }
 
 .sessionBtn:hover:not(:disabled) {
-    background: rgba(255, 157, 0, 0.2);
-    border-color: rgba(255, 157, 0, 0.4);
+    background: rgba(123, 47, 247, 0.2);
+    border-color: rgba(123, 47, 247, 0.4);
 }
 
 .sessionBtn:disabled {
@@ -296,7 +296,7 @@
 }
 
 .nextLabel {
-    color: #ff9d00;
+    color: #7b2ff7;
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 700;
@@ -315,8 +315,8 @@
 }
 
 .startNextBtn {
-    background: #ff9d00;
-    color: #000;
+    background: #7b2ff7;
+    color: #fff;
     border: none;
     padding: 1rem 2rem;
     border-radius: 50px;
@@ -324,13 +324,13 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 15px rgba(255, 157, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(123, 47, 247, 0.3);
 }
 
 .startNextBtn:hover {
     transform: scale(1.05);
-    background: #ffb745;
-    box-shadow: 0 6px 20px rgba(255, 157, 0, 0.4);
+    background: #a594f9;
+    box-shadow: 0 6px 20px rgba(123, 47, 247, 0.4);
 }
 
 .historySection {
@@ -407,8 +407,8 @@
 }
 
 .historyStats {
-    background: rgba(255, 157, 0, 0.1);
-    color: #ff9d00;
+    background: rgba(123, 47, 247, 0.1);
+    color: #7b2ff7;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -503,7 +503,7 @@
 }
 
 .eduCard h3 {
-    color: #ff9d00;
+    color: #7b2ff7;
     font-size: 1.5rem;
     margin-bottom: 1rem;
 }
@@ -598,15 +598,15 @@
 }
 
 .cardCompleted {
-    border-color: #ff9d00;
-    background: rgba(255, 157, 0, 0.08);
-    box-shadow: 0 4px 15px rgba(255, 157, 0, 0.15);
+    border-color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.08);
+    box-shadow: 0 4px 15px rgba(123, 47, 247, 0.15);
 }
 
 .cardCompleted:hover {
-    border-color: #ffcb00;
-    background: rgba(255, 157, 0, 0.12);
-    box-shadow: 0 8px 25px rgba(255, 157, 0, 0.25);
+    border-color: #a594f9;
+    background: rgba(123, 47, 247, 0.12);
+    box-shadow: 0 8px 25px rgba(123, 47, 247, 0.25);
 }
 
 .presetName {
@@ -703,9 +703,9 @@
 }
 
 .addCard:hover {
-    border-color: #ff9d00;
-    color: #ff9d00;
-    background: rgba(255, 157, 0, 0.05);
+    border-color: #7b2ff7;
+    color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.05);
 }
 
 .statsChartSection {
@@ -850,31 +850,52 @@
     width: 100%;
     padding: 0.8rem;
     border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    background: #f8f8f8;
+    border: 1px solid rgba(123, 47, 247, 0.2);
+    background: rgba(123, 47, 247, 0.03);
     color: #1a1a1a;
     font-size: 1rem;
     margin-top: 0.5rem;
+    transition: all 0.2s;
+}
+
+.modalContent input:focus,
+.modalContent select:focus {
+    outline: none;
+    border-color: #7b2ff7;
+    background: rgba(123, 47, 247, 0.06);
+    box-shadow: 0 0 0 4px rgba(123, 47, 247, 0.1);
 }
 
 .authLinksContainer {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 0.8rem;
+    gap: 1rem;
     margin-top: 1rem;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(123, 47, 247, 0.6);
     font-size: 0.8rem;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 601px) {
+    .authLinksContainer {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+}
+
+.authLinksContainer p {
+    margin: 0;
 }
 
 .authLinksContainer span {
-    color: #00ff88;
+    color: #7b2ff7;
     cursor: pointer;
     text-decoration: underline;
 }
 
 .authLinksContainer span:hover {
-    color: #ff9d00;
+    color: #a594f9;
 }
 
 .formRow {
@@ -905,13 +926,32 @@
 }
 
 .modalActions button[type="button"] {
-    background: transparent;
-    color: #4a4a4a;
+    background: rgba(123, 47, 247, 0.05);
+    color: #7b2ff7;
+    border: 1px solid rgba(123, 47, 247, 0.2);
+}
+
+.modalActions button[type="button"]:hover {
+    background: rgba(123, 47, 247, 0.1);
+    border-color: rgba(123, 47, 247, 0.4);
 }
 
 .saveBtn {
-    background: #ff9d00;
-    color: black;
+    background: #7b2ff7;
+    color: white;
+    box-shadow: 0 4px 12px rgba(123, 47, 247, 0.2);
+    transition: all 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+    background: #6a25e0;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(123, 47, 247, 0.3);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .toast {
@@ -933,9 +973,9 @@
 }
 
 .success {
-    border-color: rgba(255, 157, 0, 0.3);
-    background: rgba(255, 157, 0, 0.1);
-    color: #ff9d00;
+    border-color: rgba(123, 47, 247, 0.3);
+    background: rgba(123, 47, 247, 0.1);
+    color: #7b2ff7;
 }
 
 .error {
