@@ -734,7 +734,16 @@ function App() {
                                         }}
                                     >
                                         <div className={styles.userMainInfo}>
-                                            <span style={{ fontWeight: 600, color: '#7b2ff7' }}>{user.display_name || email}</span>
+                                            <div className={styles.userCore}>
+                                                <span className={styles.displayName}>{user.display_name || email}</span>
+                                                <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                                        <polyline points="16 17 21 12 16 7"></polyline>
+                                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
                                             {userRank && (
                                                 <div className={styles.rankBadge}>
                                                     Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
@@ -743,7 +752,7 @@ function App() {
                                         </div>
                                         <div className={styles.profileCompleteness}>
                                             <div className={styles.completenessBadge} title="Profile Completeness">
-                                                {score}% Complete
+                                                {score}%
                                                 <span
                                                     className={styles.completeNow}
                                                     onClick={(e) => {
@@ -755,11 +764,10 @@ function App() {
                                                         setIsProfileModalOpen(true);
                                                     }}
                                                 >
-                                                    {score < 100 ? "Complete Now" : "Edit Profile"}
+                                                    {score < 100 ? "Complete" : "Edit"}
                                                 </span>
                                             </div>
                                         </div>
-                                        <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
                                     </div>
                                 );
                             })() : (

@@ -117,18 +117,36 @@
 .userInfo {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    padding: 1.2rem;
+    gap: 0.4rem;
+    padding: 0.8rem 1rem;
     background: rgba(0, 0, 0, 0.02);
-    border-radius: 16px;
+    border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    min-width: 140px;
 }
 
 .userMainInfo {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.2rem;
+}
+
+.userCore {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.displayName {
+    font-weight: 600;
+    color: #7b2ff7;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 .rankBadge {
@@ -221,21 +239,19 @@
 .logoutBtn {
     background: transparent;
     border: none;
-    color: rgba(0, 0, 0, 0.3);
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.2);
+    padding: 4px;
     cursor: pointer;
     transition: all 0.2s;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
 
 .logoutBtn:hover {
     color: #ff5555;
     background: rgba(255, 85, 85, 0.05);
-    border-radius: 4px;
 }
 
 .statsSection {
