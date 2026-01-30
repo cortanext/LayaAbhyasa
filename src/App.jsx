@@ -1,38 +1,63 @@
 import { useState, useEffect } from 'react';
 import Timer from './components/timer/Timer';
+import AdminPanel from './components/admin/AdminPanel';
 import styles from './App.module.css';
 
 const WORKOUT_TEMPLATES = {
-    "15min": [
-        { id: 't1-1', name: 'Warm Up', duration: 180, type: 'gentle', chime: 'gentle' },
-        { id: 't1-2', name: 'Main Flow', duration: 420, type: 'active', chime: 'high' },
-        { id: 't1-3', name: 'Cool Down', duration: 300, type: 'gentle', chime: 'gentle' }
+    "15min-morning-flow": [
+        { id: '15-1', name: 'Pranayama - Deep Breathing', duration: 180, type: 'gentle', chime: 'gentle', description: 'Seated breathing exercises to center and energize' },
+        { id: '15-2', name: 'Cat-Cow Stretch', duration: 120, type: 'gentle', chime: 'gentle', description: 'Spinal warm-up and flexibility' },
+        { id: '15-3', name: 'Downward Facing Dog', duration: 120, type: 'active', chime: 'medium', description: 'Full body stretch and strengthening' },
+        { id: '15-4', name: 'Cobra Pose', duration: 120, type: 'active', chime: 'medium', description: 'Backbend for chest opening and spine strength' },
+        { id: '15-5', name: 'Upward Facing Dog', duration: 120, type: 'active', chime: 'medium', description: 'Deeper backbend for energy and posture' },
+        { id: '15-6', name: 'Standing Half Moon / Ardha Chandrasana', duration: 120, type: 'active', chime: 'high', description: 'Balance and side body stretch' },
+        { id: '15-7', name: "Child's Pose - Savasana", duration: 120, type: 'gentle', chime: 'gentle', description: 'Final relaxation and integration' }
     ],
-    "30min": [
-        { id: 't2-1', name: 'Sun Salutations', duration: 300, type: 'gentle', chime: 'gentle' },
-        { id: 't2-2', name: 'Standing Poses', duration: 600, type: 'active', chime: 'high' },
-        { id: 't2-3', name: 'Balance Flow', duration: 600, type: 'active', chime: 'high' },
-        { id: 't2-4', name: 'Savasana', duration: 300, type: 'gentle', chime: 'gentle' }
+    "30min-energizing-flow": [
+        { id: '30-1', name: 'Pranayama - Kapalabhati Breathing', duration: 240, type: 'gentle', chime: 'gentle', description: 'Energizing breath work' },
+        { id: '30-2', name: 'Neck and Shoulder Rolls', duration: 120, type: 'gentle', chime: 'gentle', description: 'Release upper body tension' },
+        { id: '30-3', name: 'Cat-Cow Flow', duration: 180, type: 'gentle', chime: 'gentle', description: 'Spinal mobility warm-up' },
+        { id: '30-4', name: 'Sun Salutation A (3 rounds)', duration: 360, type: 'active', chime: 'high', description: 'Dynamic flow to build heat' },
+        { id: '30-5', name: 'Warrior I', duration: 180, type: 'active', chime: 'high', description: 'Leg strength and hip opening' },
+        { id: '30-6', name: 'Warrior II', duration: 180, type: 'active', chime: 'high', description: 'Building stamina and focus' },
+        { id: '30-7', name: 'Triangle Pose', duration: 120, type: 'active', chime: 'medium', description: 'Side body stretch and balance' },
+        { id: '30-8', name: 'Standing Forward Fold', duration: 120, type: 'gentle', chime: 'medium', description: 'Hamstring stretch and calming' },
+        { id: '30-9', name: 'Bridge Pose', duration: 180, type: 'active', chime: 'medium', description: 'Hip opening and back strengthening' },
+        { id: '30-10', name: 'Seated Twist', duration: 120, type: 'gentle', chime: 'gentle', description: 'Spinal detox and digestion' },
+        { id: '30-11', name: 'Savasana', duration: 300, type: 'gentle', chime: 'gentle', description: 'Deep relaxation and integration' }
     ],
-    "30min_yoga": [
-        { id: 't3-1', name: 'Centering', duration: 300, type: 'gentle', chime: 'gentle' },
-        { id: 't3-2', name: 'Gentle Flow', duration: 900, type: 'gentle', chime: 'gentle' },
-        { id: 't3-3', name: 'Deep Stretch', duration: 600, type: 'gentle', chime: 'gentle' }
+    "45min-complete-practice": [
+        { id: '45-1', name: 'Pranayama - Nadi Shodhana', duration: 300, type: 'gentle', chime: 'gentle', description: 'Alternate nostril breathing for balance' },
+        { id: '45-2', name: 'Meditation - Centering', duration: 180, type: 'gentle', chime: 'gentle', description: 'Mindful presence and intention setting' },
+        { id: '45-3', name: 'Gentle Warm-up Flow', duration: 240, type: 'gentle', chime: 'gentle', description: 'Cat-Cow, neck rolls, shoulder circles' },
+        { id: '45-4', name: 'Sun Salutation A (5 rounds)', duration: 600, type: 'active', chime: 'high', description: 'Build heat and establish rhythm' },
+        { id: '45-5', name: 'Sun Salutation B (3 rounds)', duration: 480, type: 'active', chime: 'high', description: 'Add warrior poses and deeper flow' },
+        { id: '45-6', name: 'Warrior III', duration: 180, type: 'active', chime: 'high', description: 'Balance and core strengthening' },
+        { id: '45-7', name: 'Half Moon Pose', duration: 180, type: 'active', chime: 'high', description: 'Balance and hip opening' },
+        { id: '45-8', name: 'Tree Pose', duration: 120, type: 'active', chime: 'medium', description: 'Focus and stability' },
+        { id: '45-9', name: 'Crow Pose / Arm Balance', duration: 120, type: 'active', chime: 'high', description: 'Arm strength and body awareness' },
+        { id: '45-10', name: 'Pigeon Pose', duration: 240, type: 'gentle', chime: 'medium', description: 'Deep hip opening (both sides)' },
+        { id: '45-11', name: 'Seated Forward Fold', duration: 180, type: 'gentle', chime: 'gentle', description: 'Hamstring stretch and calming' },
+        { id: '45-12', name: 'Reclined Spinal Twist', duration: 180, type: 'gentle', chime: 'gentle', description: 'Release tension from spine' },
+        { id: '45-13', name: 'Legs Up the Wall', duration: 180, type: 'gentle', chime: 'gentle', description: 'Restore and calm nervous system' },
+        { id: '45-14', name: 'Savasana', duration: 420, type: 'gentle', chime: 'gentle', description: 'Complete relaxation and absorption' }
     ],
-    "45min": [
-        { id: 't4-1', name: 'Pranayama', duration: 300, type: 'gentle', chime: 'gentle' },
-        { id: 't4-2', name: 'Warm Up Vinyasa', duration: 600, type: 'active', chime: 'high' },
-        { id: 't4-3', name: 'Core Work', duration: 600, type: 'active', chime: 'high' },
-        { id: 't4-4', name: 'Peak Poses', duration: 900, type: 'active', chime: 'high' },
-        { id: 't4-5', name: 'Relaxation', duration: 300, type: 'gentle', chime: 'gentle' }
-    ],
-    "60min": [
-        { id: 't5-1', name: 'Meditation', duration: 300, type: 'gentle', chime: 'gentle' },
-        { id: 't5-2', name: 'Warm Up', duration: 600, type: 'active', chime: 'high' },
-        { id: 't5-3', name: 'Flow Sequence 1', duration: 900, type: 'active', chime: 'high' },
-        { id: 't5-4', name: 'Flow Sequence 2', duration: 900, type: 'active', chime: 'high' },
-        { id: 't5-5', name: 'Floor Work', duration: 600, type: 'gentle', chime: 'gentle' },
-        { id: 't5-6', name: 'Savasana', duration: 300, type: 'gentle', chime: 'gentle' }
+    "60min-full-practice": [
+        { id: '60-1', name: 'Opening Meditation', duration: 300, type: 'gentle', chime: 'gentle', description: 'Settle into practice and set intention' },
+        { id: '60-2', name: 'Pranayama - Ujjayi Breathing', duration: 300, type: 'gentle', chime: 'gentle', description: 'Victorious breath to build internal heat' },
+        { id: '60-3', name: 'Gentle Warm-up Sequence', duration: 300, type: 'gentle', chime: 'gentle', description: 'Joint mobilization and body awareness' },
+        { id: '60-4', name: 'Sun Salutation A (6 rounds)', duration: 720, type: 'active', chime: 'high', description: 'Establish flow and build heat' },
+        { id: '60-5', name: 'Sun Salutation B (5 rounds)', duration: 600, type: 'active', chime: 'high', description: 'Deepen practice with warrior poses' },
+        { id: '60-6', name: 'Standing Sequence', duration: 480, type: 'active', chime: 'high', description: 'Warrior I, II, III, Triangle, Extended Side Angle' },
+        { id: '60-7', name: 'Balance Poses', duration: 300, type: 'active', chime: 'high', description: 'Tree, Half Moon, Eagle Pose' },
+        { id: '60-8', name: 'Core Strengthening', duration: 240, type: 'active', chime: 'high', description: 'Boat pose, plank variations' },
+        { id: '60-9', name: 'Arm Balances / Inversions', duration: 240, type: 'active', chime: 'high', description: 'Crow, headstand prep, or handstand practice' },
+        { id: '60-10', name: 'Backbending Sequence', duration: 360, type: 'active', chime: 'medium', description: 'Cobra, Upward Dog, Bow, Camel, Wheel' },
+        { id: '60-11', name: 'Hip Openers', duration: 300, type: 'gentle', chime: 'medium', description: 'Pigeon, Lizard, Fire Log poses' },
+        { id: '60-12', name: 'Seated Forward Folds', duration: 240, type: 'gentle', chime: 'gentle', description: 'Head to knee, wide-legged forward fold' },
+        { id: '60-13', name: 'Spinal Twists', duration: 180, type: 'gentle', chime: 'gentle', description: 'Seated and reclined twists for detox' },
+        { id: '60-14', name: 'Shoulder Stand / Legs Up Wall', duration: 240, type: 'gentle', chime: 'gentle', description: 'Inversion for calm and restoration' },
+        { id: '60-15', name: 'Savasana', duration: 600, type: 'gentle', chime: 'gentle', description: 'Final relaxation - complete integration' }
     ]
 };
 
@@ -47,6 +72,20 @@ const DEFAULT_PRESETS = [
 const API_URL = "https://cortanext-workout-timer.sri-050.workers.dev";
 
 function App() {
+    const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+    useEffect(() => {
+        const handleLocationChange = () => setCurrentPath(window.location.pathname);
+        window.addEventListener('popstate', handleLocationChange);
+        return () => window.removeEventListener('popstate', handleLocationChange);
+    }, []);
+
+    const isAdminDomain = window.location.hostname.includes('admin');
+
+    if (isAdminDomain || currentPath.startsWith('/admin')) {
+        return <AdminPanel onClose={isAdminDomain ? null : undefined} />;
+    }
+
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('currentUser');
         try {
@@ -90,10 +129,29 @@ function App() {
     const [completedWorkouts, setCompletedWorkouts] = useState([]);
     const [completedWorkoutDetails, setCompletedWorkoutDetails] = useState([]);
     const [isResetMode, setIsResetMode] = useState(false);
-    const [resetStep, setResetStep] = useState('request'); // 'request' or 'confirm'
     const [resetEmail, setResetEmail] = useState('');
     const [resetCode, setResetCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [subscriptionTier, setSubscriptionTier] = useState(() => {
+        try {
+            const saved = localStorage.getItem('currentUser');
+            const u = saved ? JSON.parse(saved) : null;
+            return u?.subscription_tier || 'free';
+        } catch {
+            return 'free';
+        }
+    });
+    const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+    const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+
+    const STRIPE_MONTHLY_URL = 'https://buy.stripe.com/9B6aEQ0Qs8PA5NJ6zh1ZS02';
+    const STRIPE_ANNUAL_URL = 'https://buy.stripe.com/7sY14gbv6gi2gsn8Hp1ZS01';
+
+    useEffect(() => {
+        if (window.location.pathname === '/admin') {
+            setIsAdminPanelOpen(true);
+        }
+    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -118,6 +176,7 @@ function App() {
             if (data.token) {
                 setUser(data.user);
                 setToken(data.token);
+                setSubscriptionTier(data.user?.subscription_tier || 'free');
                 localStorage.setItem('currentUser', JSON.stringify(data.user));
                 localStorage.setItem('authToken', data.token);
                 setIsLoginOpen(false);
@@ -368,10 +427,63 @@ function App() {
         }
     };
 
+    const fetchSubscriptionStatus = async (authToken) => {
+        try {
+            const res = await fetch(`${API_URL}/api/subscription`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSubscriptionTier(data.subscription_tier);
+                setUser(prev => {
+                    if (!prev) return prev;
+                    const updated = { ...prev, subscription_tier: data.subscription_tier, trial_expires_at: data.trial_expires_at };
+                    localStorage.setItem('currentUser', JSON.stringify(updated));
+                    return updated;
+                });
+            }
+        } catch (e) {
+            console.error("Failed to fetch subscription", e);
+        }
+    };
+
+    const handleStartTrial = async () => {
+        setIsSyncing(true);
+        try {
+            const res = await fetch(`${API_URL}/api/start-trial`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                const newUser = {
+                    ...user,
+                    subscription_tier: 'trial',
+                    trial_expires_at: data.trial_expires_at
+                };
+                setUser(newUser);
+                setSubscriptionTier('trial');
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                showToast("2-Week Free Trial Started!", "success");
+                setIsSubscriptionModalOpen(false);
+            } else {
+                showToast(data.error || "Failed to start trial", "error");
+            }
+        } catch (err) {
+            showToast("Connection error", "error");
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
     useEffect(() => {
         if (token) {
             loadWorkouts(token);
             loadSessionHistory(token);
+            fetchSubscriptionStatus(token);
         }
     }, [token]);
 
@@ -545,6 +657,16 @@ function App() {
     };
 
     const startCreating = () => {
+        // Check if user has paid subscription for custom workouts
+        if (subscriptionTier === 'free') {
+            if (!localStorage.getItem('hasUsedFreeEdit')) {
+                localStorage.setItem('hasUsedFreeEdit', 'true');
+                showToast("First custom workout is free! 🎁 Upgrade for unlimited.", "success");
+            } else {
+                setIsSubscriptionModalOpen(true);
+                return;
+            }
+        }
         setEditingId(null);
         setModalData({ name: '', duration: 60, type: 'gentle', chime: 'gentle' });
         setIsModalOpen(true);
@@ -552,6 +674,16 @@ function App() {
 
     const startEditing = (e, workout) => {
         e.stopPropagation();
+        // Check if user has paid subscription for editing custom workouts
+        if (subscriptionTier === 'free') {
+            if (!localStorage.getItem('hasUsedFreeEdit')) {
+                localStorage.setItem('hasUsedFreeEdit', 'true');
+                showToast("First edit is free! 🎁 Upgrade for unlimited.", "success");
+            } else {
+                setIsSubscriptionModalOpen(true);
+                return;
+            }
+        }
         setEditingId(workout.id);
         setModalData({ name: workout.name, duration: workout.duration, type: workout.type, chime: workout.chime || 'high' });
         setIsModalOpen(true);
@@ -586,6 +718,16 @@ function App() {
 
     const deleteWorkout = (e, id) => {
         e.stopPropagation();
+        // Check if user has paid subscription for deleting custom workouts
+        if (subscriptionTier === 'free') {
+            if (!localStorage.getItem('hasUsedFreeEdit')) {
+                localStorage.setItem('hasUsedFreeEdit', 'true');
+                showToast("First deletion is free! 🎁 Upgrade for unlimited.", "success");
+            } else {
+                setIsSubscriptionModalOpen(true);
+                return;
+            }
+        }
         const updated = workouts.filter(w => w.id !== id);
         setWorkouts(updated);
         setSavedCustomWorkouts(updated); // Update custom cache on delete
@@ -610,7 +752,9 @@ function App() {
 
             // Filter sessions for this day
             const daySessions = sessionHistory.filter(s => {
-                const sDate = new Date(parseInt(s.session_id));
+                const sDate = s.created_at
+                    ? new Date(s.created_at.replace(" ", "T") + "Z")
+                    : new Date(parseInt(s.session_id));
                 return sDate.toLocaleDateString() === dateStr;
             });
 
@@ -709,6 +853,7 @@ function App() {
                                 <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             </div>
                             <div className={styles.subtitle}>Practice in rhythm</div>
+
                         </div>
 
                         <div className={styles.userControls}>
@@ -748,6 +893,23 @@ function App() {
                                                     Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
                                                 </div>
                                             )}
+                                            <div className={styles.subscriptionBadge}
+                                                style={{
+                                                    background: subscriptionTier === 'paid'
+                                                        ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                                                        : (subscriptionTier === 'trial' ? 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)' : 'transparent'),
+                                                    color: subscriptionTier === 'free' ? '#888' : (subscriptionTier === 'paid' ? '#333' : '#fff'),
+                                                    padding: '0.25rem 0.6rem',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    cursor: subscriptionTier === 'free' ? 'pointer' : 'default'
+                                                }}
+                                                onClick={() => subscriptionTier === 'free' && setIsSubscriptionModalOpen(true)}
+                                                title={subscriptionTier === 'free' ? 'Click to upgrade' : (subscriptionTier === 'trial' ? 'Trial Active' : 'Pro member')}
+                                            >
+                                                {subscriptionTier === 'paid' ? '✨ Pro' : (subscriptionTier === 'trial' ? '⏳ Trial' : '⭐ Free')}
+                                            </div>
                                         </div>
                                         <div className={styles.profileCompleteness}>
                                             <div className={styles.completenessBadge} title="Profile Completeness">
@@ -770,7 +932,7 @@ function App() {
                                     </div>
                                 );
                             })() : (
-                                <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login to Sync</button>
+                                <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
                             )}
 
                             <div className={styles.portability}>
@@ -802,11 +964,10 @@ function App() {
                                     <option value="" disabled>Load Template...</option>
                                     <option value="custom">My Custom Routine</option>
                                     <option disabled>──────────</option>
-                                    <option value="15min">15 Minute Quick Session</option>
-                                    <option value="30min">30 Minute Standard Session</option>
-                                    <option value="30min_yoga">30 Minute Yoga Flow</option>
-                                    <option value="45min">45 Minute Extended Session</option>
-                                    <option value="60min">1 Hour Full Practice</option>
+                                    <option value="15min-morning-flow">15-Minute Morning Flow</option>
+                                    <option value="30min-energizing-flow">30-Minute Energizing Flow</option>
+                                    <option value="45min-complete-practice">45-Minute Complete Practice</option>
+                                    <option value="60min-full-practice">60-Minute Full Practice</option>
                                 </select>
                             )}
                             <div className={styles.settingsSubRow}>
@@ -968,7 +1129,12 @@ function App() {
                                             <div className={styles.historyInfo}>
                                                 <span className={styles.historyName}>{session.name}</span>
                                                 <span className={styles.historyDate}>
-                                                    {new Date(parseInt(session.session_id)).toLocaleDateString()}
+                                                    {(() => {
+                                                        const date = session.created_at
+                                                            ? new Date(session.created_at.replace(" ", "T") + "Z")
+                                                            : new Date(parseInt(session.session_id));
+                                                        return date.toLocaleDateString();
+                                                    })()}
                                                 </span>
                                             </div>
                                             <div className={styles.historyControls}>
@@ -1287,6 +1453,175 @@ function App() {
                 />
             )
             }
+
+            {/* Subscription Upgrade Modal */}
+            {isSubscriptionModalOpen && (
+                <div className={styles.modalOverlay} onClick={() => setIsSubscriptionModalOpen(false)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <h2 style={{ marginBottom: '1rem', color: '#7b2ff7' }}>✨ Upgrade to Pro</h2>
+                        <p style={{ marginBottom: '1.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                            Unlock premium features and take your practice to the next level!
+                        </p>
+
+                        <div style={{ background: 'rgba(123, 47, 247, 0.1)', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#fff' }}>Pro Features:</h3>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                <li style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#7b2ff7', fontSize: '1.2rem' }}>✓</span>
+                                    <span>Create unlimited custom workouts</span>
+                                </li>
+                                <li style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#7b2ff7', fontSize: '1.2rem' }}>✓</span>
+                                    <span>Share workouts with friends</span>
+                                </li>
+                                <li style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#7b2ff7', fontSize: '1.2rem' }}>✓</span>
+                                    <span>Unlimited progress history</span>
+                                </li>
+                                <li style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#7b2ff7', fontSize: '1.2rem' }}>✓</span>
+                                    <span>Priority support</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {(!user?.trial_expires_at && subscriptionTier !== 'trial' && subscriptionTier !== 'paid') && (
+                            <div
+                                onClick={handleStartTrial}
+                                style={{
+                                    background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
+                                    color: '#fff',
+                                    padding: '1rem',
+                                    borderRadius: '12px',
+                                    marginBottom: '1.5rem',
+                                    textAlign: 'center',
+                                    fontWeight: '700',
+                                    fontSize: '1rem',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 12px rgba(0, 114, 255, 0.3)',
+                                    transition: 'transform 0.2s',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                🎉 Start 2-Week Free Trial (No Card Required)
+                            </div>
+                        )}
+
+                        {subscriptionTier === 'trial' && user?.trial_expires_at && (
+                            <div style={{
+                                background: 'rgba(0, 198, 255, 0.1)',
+                                border: '1px solid rgba(0, 198, 255, 0.4)',
+                                color: '#00C6FF',
+                                padding: '0.75rem',
+                                borderRadius: '12px',
+                                marginBottom: '1rem',
+                                textAlign: 'center',
+                                fontWeight: '600',
+                                fontSize: '0.9rem'
+                            }}>
+                                ⏳ Trial Expires: {new Date(user.trial_expires_at).toLocaleDateString()}
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                            <a
+                                href={STRIPE_MONTHLY_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    flex: 1,
+                                    textDecoration: 'none',
+                                    background: 'rgba(123, 47, 247, 0.15)',
+                                    border: '2px solid rgba(123, 47, 247, 0.4)',
+                                    borderRadius: '12px',
+                                    padding: '1.25rem',
+                                    textAlign: 'center',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(123, 47, 247, 0.25)';
+                                    e.currentTarget.style.borderColor = '#7b2ff7';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(123, 47, 247, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(123, 47, 247, 0.4)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                <div style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem' }}>Monthly</div>
+                                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#7b2ff7', marginBottom: '0.25rem' }}>$1.99</div>
+                                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>per month</div>
+                            </a>
+
+                            <a
+                                href={STRIPE_ANNUAL_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    flex: 1,
+                                    textDecoration: 'none',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    border: '2px solid #764ba2',
+                                    borderRadius: '12px',
+                                    padding: '1.25rem',
+                                    textAlign: 'center',
+                                    position: 'relative',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(123, 47, 247, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-10px',
+                                    right: '10px',
+                                    background: '#34c759',
+                                    color: '#fff',
+                                    padding: '0.25rem 0.5rem',
+                                    borderRadius: '6px',
+                                    fontSize: '0.65rem',
+                                    fontWeight: '700'
+                                }}>SAVE 33%</div>
+                                <div style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.9)', marginBottom: '0.5rem' }}>Annual</div>
+                                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>$15.99</div>
+                                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)' }}>per year ($1.33/mo)</div>
+                            </a>
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button type="button" onClick={() => setIsSubscriptionModalOpen(false)} style={{ width: '100%' }}>
+                                Maybe Later
+                            </button>
+                        </div>
+
+                        <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '1rem', textAlign: 'center' }}>
+                            Secure payment powered by Stripe
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Admin Panel */}
+            {isAdminPanelOpen && (
+                <AdminPanel onClose={() => {
+                    setIsAdminPanelOpen(false);
+                    if (window.location.pathname === '/admin') {
+                        window.history.pushState({}, '', '/');
+                    }
+                }} />
+            )}
+
             {
                 toast.message && (
                     <div className={`${styles.toast} ${styles[toast.type]}`}>

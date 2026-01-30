@@ -2,10 +2,16 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         if (url.pathname.startsWith('/api/')) {
-            // TODO: Proxy to backend if needed, or handle API here
             return new Response("API not found", { status: 404 });
         }
         // Serve static assets
-        return env.ASSETS.fetch(request);
+        let response = await env.ASSETS.fetch(request);
+
+        // SPA Fallback: If asset not found (404) and it's not a file request (no extension), serve index.html
+        if (response.status === 404 && !url.pathname.split('/').pop().includes('.')) {
+            return env.ASSETS.fetch(new URL("/", request.url));
+        }
+
+        return response;
     },
 };

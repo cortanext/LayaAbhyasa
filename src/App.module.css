@@ -92,7 +92,35 @@
 
 .settingToggle input {
     cursor: pointer;
-    accent-color: #7b2ff7;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #7b2ff7;
+    border-radius: 6px;
+    background: transparent;
+    display: grid;
+    place-content: center;
+    transition: all 0.2s;
+}
+
+.settingToggle input::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: 0.2s transform ease-in-out;
+    box-shadow: inset 1em 1em white;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.settingToggle input:checked {
+    background: #7b2ff7;
+}
+
+.settingToggle input:checked::before {
+    transform: scale(1);
 }
 
 .appLogo {
@@ -642,8 +670,10 @@
 }
 
 .detailDuration {
-    color: rgba(0, 0, 0, 0.6);
+    color: rgba(0, 0, 0, 0.85);
+    /* Darker for better contrast */
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .presetGrid {
@@ -664,7 +694,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    /* Stronger shadow */
     min-height: 120px;
     justify-content: center;
 }
@@ -731,7 +763,8 @@
 
 .presetTime {
     font-size: 0.9rem;
-    color: #4a4a4a;
+    color: #2d2d2d;
+    /* Darker gray */
     background: rgba(0, 0, 0, 0.05);
     padding: 0.2rem 0.8rem;
     border-radius: 12px;
