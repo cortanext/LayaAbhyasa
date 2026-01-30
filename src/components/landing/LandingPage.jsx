@@ -1,23 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './LandingPage.module.css';
 
 const LandingPage = ({ onStart, onLogin }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [countdown, setCountdown] = useState(4);
+    const [countdown, setCountdown] = useState(6);
+    const diffRef = useRef(null);
+    const pricingRef = useRef(null);
 
     useEffect(() => {
-        setIsVisible(true);
+        // Countdown timer
         const timer = setInterval(() => {
-            setCountdown(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    onStart();
-                    return 0;
-                }
-                return prev - 1;
-            });
+            setCountdown(prev => prev > 0 ? prev - 1 : 0);
         }, 1000);
-        return () => clearInterval(timer);
+
+        // Sequence: 
+        // 0s-2s: Hero
+        // 2s: Scroll to Intros
+        const scroll1 = setTimeout(() => {
+            diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 2000);
+
+        // 4s: Scroll to Pricing
+        const scroll2 = setTimeout(() => {
+            pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 4000);
+
+        // 6s: Redirect
+        const redirect = setTimeout(() => {
+            onStart();
+        }, 6000);
+
+        return () => {
+            clearInterval(timer);
+            clearTimeout(scroll1);
+            clearTimeout(scroll2);
+            clearTimeout(redirect);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -39,6 +56,10 @@ const LandingPage = ({ onStart, onLogin }) => {
                 <div>
                     <button className={styles.ctaBtn} onClick={onStart}>Start Building Your Flow</button>
                     <button className={styles.secondaryBtn} onClick={onLogin}>Sign In</button>
+                </div>
+
+                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                    Entering Flow in {countdown}s...
                 </div>
 
                 <div className={styles.mockupContainer}>
@@ -67,13 +88,10 @@ const LandingPage = ({ onStart, onLogin }) => {
                         </div>
                     </div>
                 </div>
-                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    Entering Flow in {countdown}s...
-                </div>
             </section>
 
             {/* Differentiation */}
-            <section className={styles.diffSection}>
+            <section className={styles.diffSection} ref={diffRef}>
                 <h2 className={styles.sectionTitle}>Why not just use a timer?</h2>
                 <p className={styles.sectionDesc}>
                     Because Flow Laya is a <strong>Practice Operating System</strong>.
@@ -117,7 +135,7 @@ const LandingPage = ({ onStart, onLogin }) => {
             </section>
 
             {/* Pricing */}
-            <section className={styles.pricingSection}>
+            <section className={styles.pricingSection} ref={pricingRef}>
                 <h2 className={styles.sectionTitle}>Simple Pricing</h2>
                 <div className={styles.pricingGrid}>
                     <div className={styles.pricingCard}>
@@ -142,6 +160,9 @@ const LandingPage = ({ onStart, onLogin }) => {
                         </ul>
                         <button className={styles.ctaBtn} onClick={onLogin} style={{ width: '100%' }}>Go Pro</button>
                     </div>
+                </div>
+                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                    Entering Flow in {countdown}s...
                 </div>
             </section>
         </div>
