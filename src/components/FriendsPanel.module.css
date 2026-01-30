@@ -1,0 +1,63 @@
+.container {
+    padding: 1rem;
+    color: #fff;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h3 {
+    color: #7b2ff7;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(123, 47, 247, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.friendList,
+.routineList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.friendItem,
+.routineItem {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.friendInfo,
+.routineInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.friendName,
+.routineName {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.friendEmail,
+.routineMeta {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+.emptyState {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 2rem;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}

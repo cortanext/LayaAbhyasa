@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import Timer from './components/timer/Timer';
 import AdminPanel from './components/admin/AdminPanel';
+import LandingPage from './components/landing/LandingPage';
+import ShareRoutineModal from './components/ShareRoutineModal';
+import FriendsPanel from './components/FriendsPanel';
+import ReceivedRoutines from './components/ReceivedRoutines';
 import styles from './App.module.css';
 
 const WORKOUT_TEMPLATES = {
@@ -95,7 +99,9 @@ function App() {
         }
     });
     const [token, setToken] = useState(() => localStorage.getItem('authToken') || null);
+    const [hasEnteredApp, setHasEnteredApp] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('routines'); // 'routines', 'received', 'friends'
     const [isSignup, setIsSignup] = useState(false);
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
@@ -118,6 +124,7 @@ function App() {
     // Cache for User's "Actual" Template (Custom Routine)
     const [savedCustomWorkouts, setSavedCustomWorkouts] = useState(null);
     const [statsTimeframe, setStatsTimeframe] = useState('week');
+    const [selectedTemplate, setSelectedTemplate] = useState(() => localStorage.getItem('selectedTemplate') || null);
 
     const showToast = (message, type = 'info') => {
         setToast({ message, type });
@@ -143,6 +150,8 @@ function App() {
     });
     const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
     const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
 
     const STRIPE_MONTHLY_URL = 'https://buy.stripe.com/9B6aEQ0Qs8PA5NJ6zh1ZS02';
     const STRIPE_ANNUAL_URL = 'https://buy.stripe.com/7sY14gbv6gi2gsn8Hp1ZS01';
@@ -153,12 +162,45 @@ function App() {
         }
     }, []);
 
+    // Auto-load saved template on mount
+    useEffect(() => {
+        if (selectedTemplate && !activeWorkout) {
+            // Only auto-load if no workout is currently active
+            const template = WORKOUT_TEMPLATES[selectedTemplate];
+            if (template) {
+                const newWorkouts = template.map(item => ({
+                    ...item,
+                    id: Date.now() + Math.random()
+                }));
+                setWorkouts(newWorkouts);
+            }
+        }
+    }, []); // Run once on mount
+
+    // Check for invite= URL parameter (Registration Flow)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const inviteCode = params.get('invite');
+
+        if (inviteCode && !token) {
+            // Open signup modal for new user
+            setIsLoginOpen(true);
+            setIsSignup(true);
+            showToast("Welcome! Create an account to access the shared routine.", "success");
+        } else if (inviteCode && token) {
+            showToast("You are already logged in. Ask your friend to share directly with your email.", "info");
+        }
+    }, [token]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsSyncing(true);
         const endpoint = isSignup ? "/auth/signup" : "/auth/login";
 
         try {
+            const params = new URLSearchParams(window.location.search);
+            const inviteCode = params.get('invite');
+
             const res = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -168,7 +210,8 @@ function App() {
                     age_range: isSignup ? signupAgeRange : undefined,
                     gender: isSignup ? signupGender : undefined,
                     zip: isSignup ? signupZip : undefined,
-                    display_name: isSignup ? signupDisplayName : undefined
+                    display_name: isSignup ? signupDisplayName : undefined,
+                    inviteCode: isSignup ? inviteCode : undefined
                 })
             });
             const data = await res.json();
@@ -190,7 +233,11 @@ function App() {
                 loadWorkouts(data.token);
                 fetchUserRank(data.token);
             } else if (data.success && isSignup) {
-                showToast("Signup successful! Please login.", "success");
+                if (data.invitedRoutine) {
+                    showToast(`Account created! Login to access "${data.invitedRoutine.routine_name}" shared by your friend.`, "success");
+                } else {
+                    showToast("Signup successful! Please login.", "success");
+                }
                 setIsSignup(false);
                 setLoginPassword('');
                 setSignupAgeRange('');
@@ -377,6 +424,8 @@ function App() {
             if (savedCustomWorkouts) {
                 setWorkouts(savedCustomWorkouts);
                 if (token) saveWorkoutsToCloud(savedCustomWorkouts);
+                setSelectedTemplate('custom');
+                localStorage.setItem('selectedTemplate', 'custom');
                 showToast("Custom routine restored!", "success");
             } else {
                 showToast("No custom routine saved.", "error");
@@ -393,8 +442,16 @@ function App() {
             }));
             setWorkouts(newWorkouts);
             if (token) saveWorkoutsToCloud(newWorkouts);
+            setSelectedTemplate(templateKey);
+            localStorage.setItem('selectedTemplate', templateKey);
             showToast("Template loaded!", "success");
         }
+    };
+
+    const clearTemplateSelection = () => {
+        setSelectedTemplate(null);
+        localStorage.removeItem('selectedTemplate');
+        showToast("Template selection cleared", "info");
     };
 
     const loadSessionHistory = async (token) => {
@@ -845,604 +902,450 @@ function App() {
     return (
         <div className={styles.container}>
             {!activeWorkout ? (
-                <main className={styles.dashboard}>
-                    <header className={styles.header}>
-                        <div className={styles.titleSection}>
-                            <div className={styles.brandGroup}>
-                                <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto' }} />
-                                <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
-                            </div>
-                            <div className={styles.subtitle}>Practice in rhythm</div>
-
-                        </div>
-
-                        <div className={styles.userControls}>
-                            {user ? (() => {
-                                const email = typeof user === 'object' ? user?.email : user;
-                                const age = typeof user === 'object' ? user?.age_range : null;
-                                const gender = typeof user === 'object' ? user?.gender : null;
-                                const zip = typeof user === 'object' ? user?.zip : null;
-
-                                let score = 0;
-                                if (email) score += 25;
-                                if (age) score += 25;
-                                if (gender) score += 25;
-                                if (zip) score += 25;
-
-                                return (
-                                    <div
-                                        className={styles.userInfo}
-                                        style={{
-                                            background: score > 0 ? `linear-gradient(to right, rgba(123, 47, 247, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)` : 'rgba(0, 0, 0, 0.02)',
-                                            border: `1px solid rgba(123, 47, 247, ${score / 200 + 0.1})`
-                                        }}
-                                    >
-                                        <div className={styles.userMainInfo}>
-                                            <div className={styles.userCore}>
-                                                <span className={styles.displayName}>{user.display_name || email}</span>
-                                                <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                                        <polyline points="16 17 21 12 16 7"></polyline>
-                                                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            {userRank && (
-                                                <div className={styles.rankBadge}>
-                                                    Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
-                                                </div>
-                                            )}
-                                            <div className={styles.subscriptionBadge}
-                                                style={{
-                                                    background: subscriptionTier === 'paid'
-                                                        ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-                                                        : (subscriptionTier === 'trial' ? 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)' : 'transparent'),
-                                                    color: subscriptionTier === 'free' ? '#888' : (subscriptionTier === 'paid' ? '#333' : '#fff'),
-                                                    padding: '0.25rem 0.6rem',
-                                                    borderRadius: '12px',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: '600',
-                                                    cursor: subscriptionTier === 'free' ? 'pointer' : 'default'
-                                                }}
-                                                onClick={() => subscriptionTier === 'free' && setIsSubscriptionModalOpen(true)}
-                                                title={subscriptionTier === 'free' ? 'Click to upgrade' : (subscriptionTier === 'trial' ? 'Trial Active' : 'Pro member')}
-                                            >
-                                                {subscriptionTier === 'paid' ? '✨ Pro' : (subscriptionTier === 'trial' ? '⏳ Trial' : '⭐ Free')}
-                                            </div>
-                                        </div>
-                                        <div className={styles.profileCompleteness}>
-                                            <div className={styles.completenessBadge} title="Profile Completeness">
-                                                {score}%
-                                                <span
-                                                    className={styles.completeNow}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSignupAgeRange(user.age_range || '');
-                                                        setSignupGender(user.gender || '');
-                                                        setSignupZip(user.zip || '');
-                                                        setSignupDisplayName(user.display_name || '');
-                                                        setIsProfileModalOpen(true);
-                                                    }}
-                                                >
-                                                    {score < 100 ? "Complete" : "Edit"}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })() : (
-                                <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
-                            )}
-
-                            <div className={styles.portability}>
-                                <button onClick={handleExport} className={styles.portBtn}>Export Data</button>
-                                <label className={styles.portBtn}>
-                                    Import Data
-                                    <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className={styles.settingsSection}>
-                            {user && (
-                                <select
-                                    onChange={(e) => selectTemplate(e.target.value)}
-                                    style={{
-                                        padding: '0.4rem 0.8rem',
-                                        borderRadius: '8px',
-                                        border: '1px solid rgba(123, 47, 247, 0.3)',
-                                        background: 'rgba(123, 47, 247, 0.15)',
-                                        color: '#7b2ff7',
-                                        fontSize: '0.85rem',
-                                        cursor: 'pointer',
-                                        outline: 'none',
-                                        fontWeight: '600'
-                                    }}
-                                    defaultValue=""
-                                >
-                                    <option value="" disabled>Load Template...</option>
-                                    <option value="custom">My Custom Routine</option>
-                                    <option disabled>──────────</option>
-                                    <option value="15min-morning-flow">15-Minute Morning Flow</option>
-                                    <option value="30min-energizing-flow">30-Minute Energizing Flow</option>
-                                    <option value="45min-complete-practice">45-Minute Complete Practice</option>
-                                    <option value="60min-full-practice">60-Minute Full Practice</option>
-                                </select>
-                            )}
-                            <div className={styles.settingsSubRow}>
-                                <label className={styles.settingToggle}>
-                                    <input
-                                        type="checkbox"
-                                        checked={muteBeeps}
-                                        onChange={(e) => {
-                                            const val = e.target.checked;
-                                            setMuteBeeps(val);
-                                            localStorage.setItem('muteBeeps', val);
-                                        }}
-                                    />
-                                    <span>Mute Countdown Beeps</span>
-                                </label>
-                                <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
-                            </div>
-                        </div>
-                    </header>
-
-
-
-                    {nextWorkoutPending && (
-                        <section className={styles.nextWorkoutSection}>
-                            <div className={styles.nextWorkoutCard}>
-                                <div className={styles.nextWorkoutInfo}>
-                                    <span className={styles.nextLabel}>Next Up</span>
-                                    <h3>{nextWorkoutPending.name}</h3>
-                                    <span className={styles.nextDuration}>{Math.floor(nextWorkoutPending.duration / 60)}m {nextWorkoutPending.duration % 60}s</span>
+                (!user && !hasEnteredApp) ?
+                    <LandingPage onStart={() => setHasEnteredApp(true)} onLogin={() => setIsLoginOpen(true)} />
+                    :
+                    <main className={styles.dashboard}>
+                        <header className={styles.header}>
+                            <div className={styles.titleSection}>
+                                <div className={styles.brandGroup}>
+                                    <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto' }} />
+                                    <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                                 </div>
-                                <button className={styles.startNextBtn} onClick={() => startWorkout(nextWorkoutPending)}>
-                                    Start Now
-                                </button>
-                            </div>
-                        </section>
-                    )}
+                                <div className={styles.subtitle}>Practice in rhythm</div>
 
-                    <section className={styles.presetGrid}>
-                        {workouts.map((workout, index) => (
-                            <div
-                                key={workout.id}
-                                className={`
+                            </div>
+
+                            <div className={styles.userControls}>
+                                {user ? (() => {
+                                    const email = typeof user === 'object' ? user?.email : user;
+                                    const age = typeof user === 'object' ? user?.age_range : null;
+                                    const gender = typeof user === 'object' ? user?.gender : null;
+                                    const zip = typeof user === 'object' ? user?.zip : null;
+
+                                    let score = 0;
+                                    if (email) score += 25;
+                                    if (age) score += 25;
+                                    if (gender) score += 25;
+                                    if (zip) score += 25;
+
+                                    return (
+                                        <div
+                                            className={styles.userInfo}
+                                            style={{
+                                                background: score > 0 ? `linear-gradient(to right, rgba(123, 47, 247, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)` : 'rgba(0, 0, 0, 0.02)',
+                                                border: `1px solid rgba(123, 47, 247, ${score / 200 + 0.1})`
+                                            }}
+                                        >
+                                            <div className={styles.userMainInfo}>
+                                                <div className={styles.userCore}>
+                                                    <span className={styles.displayName}>{user.display_name || email}</span>
+                                                    <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                                            <polyline points="16 17 21 12 16 7"></polyline>
+                                                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                {userRank && (
+                                                    <div className={styles.rankBadge}>
+                                                        Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
+                                                    </div>
+                                                )}
+                                                <div className={styles.subscriptionBadge}
+                                                    style={{
+                                                        background: subscriptionTier === 'paid'
+                                                            ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                                                            : (subscriptionTier === 'trial' ? 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)' : 'transparent'),
+                                                        color: subscriptionTier === 'free' ? '#888' : (subscriptionTier === 'paid' ? '#333' : '#fff'),
+                                                        padding: '0.25rem 0.6rem',
+                                                        borderRadius: '12px',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '600',
+                                                        cursor: subscriptionTier === 'free' ? 'pointer' : 'default'
+                                                    }}
+                                                    onClick={() => subscriptionTier === 'free' && setIsSubscriptionModalOpen(true)}
+                                                    title={subscriptionTier === 'free' ? 'Click to upgrade' : (subscriptionTier === 'trial' ? 'Trial Active' : 'Pro member')}
+                                                >
+                                                    {subscriptionTier === 'paid' ? '✨ Pro' : (subscriptionTier === 'trial' ? '⏳ Trial' : '⭐ Free')}
+                                                </div>
+                                            </div>
+                                            <div className={styles.profileCompleteness}>
+                                                <div className={styles.completenessBadge} title="Profile Completeness">
+                                                    {score}%
+                                                    <span
+                                                        className={styles.completeNow}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSignupAgeRange(user.age_range || '');
+                                                            setSignupGender(user.gender || '');
+                                                            setSignupZip(user.zip || '');
+                                                            setSignupDisplayName(user.display_name || '');
+                                                            setIsProfileModalOpen(true);
+                                                        }}
+                                                    >
+                                                        {score < 100 ? "Complete" : "Edit"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })() : (
+                                    <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
+                                )}
+
+                                <div className={styles.portability}>
+                                    <button onClick={handleExport} className={styles.portBtn}>Export Data</button>
+                                    <label className={styles.portBtn}>
+                                        Import Data
+                                        <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+                                    </label>
+                                </div>
+
+                                {user && workouts.length > 0 && (
+                                    <div className={styles.portability} style={{ marginTop: '0.5rem' }}>
+                                        <button
+                                            onClick={() => setIsShareModalOpen(true)}
+                                            className={styles.portBtn}
+                                            style={{ background: 'rgba(123, 47, 247, 0.15)', border: '1px solid rgba(123, 47, 247, 0.3)' }}
+                                        >
+                                            📤 Share Routine
+                                        </button>
+
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.settingsSection}>
+                                {user && (
+                                    <select
+                                        onChange={(e) => selectTemplate(e.target.value)}
+                                        style={{
+                                            padding: '0.4rem 0.8rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(123, 47, 247, 0.3)',
+                                            background: 'rgba(123, 47, 247, 0.15)',
+                                            color: '#7b2ff7',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            outline: 'none',
+                                            fontWeight: '600'
+                                        }}
+                                        defaultValue=""
+                                    >
+                                        <option value="" disabled>Load Template...</option>
+                                        <option value="custom">My Custom Routine</option>
+                                        <option disabled>──────────</option>
+                                        <option value="15min-morning-flow">15-Minute Morning Flow</option>
+                                        <option value="30min-energizing-flow">30-Minute Energizing Flow</option>
+                                        <option value="45min-complete-practice">45-Minute Complete Practice</option>
+                                        <option value="60min-full-practice">60-Minute Full Practice</option>
+                                    </select>
+                                )}
+                                {selectedTemplate && (
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.35rem 0.8rem',
+                                        background: 'rgba(123, 47, 247, 0.08)',
+                                        border: '1px solid rgba(123, 47, 247, 0.2)',
+                                        borderRadius: '8px',
+                                        fontSize: '0.75rem',
+                                        color: '#7b2ff7'
+                                    }}>
+                                        <span>✓ {selectedTemplate === 'custom' ? 'Custom Routine' :
+                                            selectedTemplate === '15min-morning-flow' ? '15-Min Flow' :
+                                                selectedTemplate === '30min-energizing-flow' ? '30-Min Flow' :
+                                                    selectedTemplate === '45min-complete-practice' ? '45-Min Practice' :
+                                                        selectedTemplate === '60min-full-practice' ? '60-Min Practice' : 'Template'
+                                        }</span>
+                                        <button
+                                            onClick={clearTemplateSelection}
+                                            style={{
+                                                background: 'transparent',
+                                                border: 'none',
+                                                color: '#7b2ff7',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem',
+                                                padding: '0',
+                                                lineHeight: '1'
+                                            }}
+                                            title="Clear template selection"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                )}
+                                <div className={styles.settingsSubRow}>
+                                    <label className={styles.settingToggle}>
+                                        <input
+                                            type="checkbox"
+                                            checked={muteBeeps}
+                                            onChange={(e) => {
+                                                const val = e.target.checked;
+                                                setMuteBeeps(val);
+                                                localStorage.setItem('muteBeeps', val);
+                                            }}
+                                        />
+                                        <span>Mute Countdown Beeps</span>
+                                    </label>
+                                    <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div className={styles.tabsContainer}>
+                            <button
+                                className={`${styles.tabButton} ${activeTab === 'routines' ? styles.active : ''}`}
+                                onClick={() => setActiveTab('routines')}
+                            >
+                                My Routines
+                            </button>
+                            <button
+                                className={`${styles.tabButton} ${activeTab === 'received' ? styles.active : ''}`}
+                                onClick={() => setActiveTab('received')}
+                            >
+                                Received Routines
+                            </button>
+                            <button
+                                className={`${styles.tabButton} ${activeTab === 'friends' ? styles.active : ''}`}
+                                onClick={() => setActiveTab('friends')}
+                            >
+                                Friends & Sharing
+                            </button>
+                        </div>
+
+                        {activeTab === 'routines' && (
+                            <>
+                                {nextWorkoutPending && (
+                                    <section className={styles.nextWorkoutSection}>
+                                        <div className={styles.nextWorkoutCard}>
+                                            <div className={styles.nextWorkoutInfo}>
+                                                <span className={styles.nextLabel}>Next Up</span>
+                                                <h3>{nextWorkoutPending.name}</h3>
+                                                <span className={styles.nextDuration}>{Math.floor(nextWorkoutPending.duration / 60)}m {nextWorkoutPending.duration % 60}s</span>
+                                            </div>
+                                            <button className={styles.startNextBtn} onClick={() => startWorkout(nextWorkoutPending)}>
+                                                Start Now
+                                            </button>
+                                        </div>
+                                    </section>
+                                )}
+
+                                <section className={styles.presetGrid}>
+                                    {workouts.map((workout, index) => (
+                                        <div
+                                            key={workout.id}
+                                            className={`
                                     ${styles.presetCard} 
                                     ${workout.type === 'gentle' ? styles.cardGentle : ''}
                                     ${completedWorkouts.includes(workout.id) ? styles.cardCompleted : ''}
                                 `}
-                                onClick={() => startWorkout(workout)}
-                            >
-                                <div className={styles.cardActions}>
-                                    <div className={styles.reorderGroup}>
-                                        <button
-                                            className={styles.reorderBtn}
-                                            onClick={(e) => moveWorkout(e, index, -1)}
-                                            disabled={index === 0}
+                                            onClick={() => startWorkout(workout)}
                                         >
-                                            ‹
-                                        </button>
-                                        <button
-                                            className={styles.reorderBtn}
-                                            onClick={(e) => moveWorkout(e, index, 1)}
-                                            disabled={index === workouts.length - 1}
-                                        >
-                                            ›
-                                        </button>
-                                    </div>
-                                    <button className={styles.editBtn} onClick={(e) => startEditing(e, workout)}>✎</button>
-                                    <button className={styles.deleteBtn} onClick={(e) => deleteWorkout(e, workout.id)}>×</button>
-                                </div>
-                                <h3 className={styles.presetName}>{workout.name}</h3>
-                                <div className={styles.presetDetails}>
-                                    <span className={styles.presetTime}>{Math.floor(workout.duration / 60)}m</span>
-                                    {workout.type === 'gentle' && <span className={styles.tagGentle}>Yoga</span>}
-                                </div>
-                            </div>
-                        ))}
-                        <div className={styles.addCard} onClick={startCreating}>+</div>
-                    </section>
-
-                    <section className={styles.statsSection}>
-                        <div className={styles.statsRow}>
-                            <div className={styles.statBox}>
-                                <span className={styles.statValue}>{completedWorkouts.length}</span>
-                                <span className={styles.statLabel}>Completed</span>
-                            </div>
-                            <div className={styles.statBox}>
-                                <span className={styles.statValue}>
-                                    {Math.round(completedWorkouts.reduce((acc, id) => {
-                                        const w = workouts.find(work => work.id === id);
-                                        return acc + (w ? w.duration : 0);
-                                    }, 0) / 60)}
-                                </span>
-                                <span className={styles.statLabel}>Total Min</span>
-                            </div>
-                            <div className={styles.statActions}>
-                                <button
-                                    onClick={saveSession}
-                                    className={styles.sessionBtn}
-                                    disabled={completedWorkouts.length === 0 || isSavingSession || !token}
-                                    title={!token ? "Login to save sessions" : ""}
-                                >
-                                    {isSavingSession ? "..." : "Save Session"}
-                                </button>
-                                <button
-                                    onClick={startNewSession}
-                                    className={styles.sessionBtn}
-                                    disabled={completedWorkouts.length === 0}
-                                >
-                                    New Session
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    {user && (
-                        <section className={styles.statsChartSection}>
-                            <div className={styles.chartHeader}>
-                                <h3>Your Activity</h3>
-                                <div className={styles.timeframeToggle}>
-                                    <button
-                                        className={`${styles.timeframeBtn} ${statsTimeframe === 'week' ? styles.timeframeBtnActive : ''}`}
-                                        onClick={() => setStatsTimeframe('week')}
-                                    >
-                                        Week
-                                    </button>
-                                    <button
-                                        className={`${styles.timeframeBtn} ${statsTimeframe === 'month' ? styles.timeframeBtnActive : ''}`}
-                                        onClick={() => setStatsTimeframe('month')}
-                                    >
-                                        Month
-                                    </button>
-                                </div>
-                            </div>
-                            <div className={styles.chartContainer}>
-                                {getChartData().map((d, idx) => (
-                                    <div key={idx} className={styles.chartBarGroup}>
-                                        <div
-                                            className={styles.chartBar}
-                                            style={{ height: d.height }}
-                                            data-value={d.value}
-                                        />
-                                        <span className={styles.chartLabel}>{d.label}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {token && sessionHistory.length > 0 && (
-                        <section className={styles.historySection}>
-                            <h2 className={styles.sectionTitle}>Session History</h2>
-                            <div className={styles.historyList}>
-                                {sessionHistory.map(session => (
-                                    <div
-                                        key={session.session_id}
-                                        className={`${styles.historyItem} ${selectedSession?.session_id === session.session_id ? styles.historyItemExpanded : ''}`}
-                                        onClick={() => setSelectedSession(selectedSession?.session_id === session.session_id ? null : session)}
-                                    >
-                                        <div className={styles.historyMain}>
-                                            <div className={styles.historyInfo}>
-                                                <span className={styles.historyName}>{session.name}</span>
-                                                <span className={styles.historyDate}>
-                                                    {(() => {
-                                                        const date = session.created_at
-                                                            ? new Date(session.created_at.replace(" ", "T") + "Z")
-                                                            : new Date(parseInt(session.session_id));
-                                                        return date.toLocaleDateString();
-                                                    })()}
-                                                </span>
-                                            </div>
-                                            <div className={styles.historyControls}>
-                                                <div className={styles.historyStats}>
-                                                    {session.workouts.length} workouts
+                                            <div className={styles.cardActions}>
+                                                <div className={styles.reorderGroup}>
+                                                    <button
+                                                        className={styles.reorderBtn}
+                                                        onClick={(e) => moveWorkout(e, index, -1)}
+                                                        disabled={index === 0}
+                                                    >
+                                                        ‹
+                                                    </button>
+                                                    <button
+                                                        className={styles.reorderBtn}
+                                                        onClick={(e) => moveWorkout(e, index, 1)}
+                                                        disabled={index === workouts.length - 1}
+                                                    >
+                                                        ›
+                                                    </button>
                                                 </div>
+                                                <button className={styles.editBtn} onClick={(e) => startEditing(e, workout)}>✎</button>
+                                                <button className={styles.deleteBtn} onClick={(e) => deleteWorkout(e, workout.id)}>×</button>
+                                            </div>
+                                            <h3 className={styles.presetName}>{workout.name}</h3>
+                                            <div className={styles.presetDetails}>
+                                                <span className={styles.presetTime}>{Math.floor(workout.duration / 60)}m</span>
+                                                {workout.type === 'gentle' && <span className={styles.tagGentle}>Yoga</span>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className={styles.addCard} onClick={startCreating}>+</div>
+                                </section>
+
+                                <section className={styles.statsSection}>
+                                    <div className={styles.statsRow}>
+                                        <div className={styles.statBox}>
+                                            <span className={styles.statValue}>{completedWorkouts.length}</span>
+                                            <span className={styles.statLabel}>Completed</span>
+                                        </div>
+                                        <div className={styles.statBox}>
+                                            <span className={styles.statValue}>
+                                                {Math.round(completedWorkouts.reduce((acc, id) => {
+                                                    const w = workouts.find(work => work.id === id);
+                                                    return acc + (w ? w.duration : 0);
+                                                }, 0) / 60)}
+                                            </span>
+                                            <span className={styles.statLabel}>Total Min</span>
+                                        </div>
+                                        <div className={styles.statActions}>
+                                            <button
+                                                onClick={saveSession}
+                                                className={styles.sessionBtn}
+                                                disabled={completedWorkouts.length === 0 || isSavingSession || !token}
+                                                title={!token ? "Login to save sessions" : ""}
+                                            >
+                                                {isSavingSession ? "..." : "Save Session"}
+                                            </button>
+                                            <button
+                                                onClick={startNewSession}
+                                                className={styles.sessionBtn}
+                                                disabled={completedWorkouts.length === 0}
+                                            >
+                                                New Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {user && (
+                                    <section className={styles.statsChartSection}>
+                                        <div className={styles.chartHeader}>
+                                            <h3>Your Activity</h3>
+                                            <div className={styles.timeframeToggle}>
                                                 <button
-                                                    className={styles.sessionDeleteBtn}
-                                                    onClick={(e) => deleteHistorySession(e, session.session_id)}
-                                                    title="Remove from history"
+                                                    className={`${styles.timeframeBtn} ${statsTimeframe === 'week' ? styles.timeframeBtnActive : ''}`}
+                                                    onClick={() => setStatsTimeframe('week')}
                                                 >
-                                                    ×
+                                                    Week
+                                                </button>
+                                                <button
+                                                    className={`${styles.timeframeBtn} ${statsTimeframe === 'month' ? styles.timeframeBtnActive : ''}`}
+                                                    onClick={() => setStatsTimeframe('month')}
+                                                >
+                                                    Month
                                                 </button>
                                             </div>
                                         </div>
+                                        <div className={styles.chartContainer}>
+                                            {getChartData().map((d, idx) => (
+                                                <div key={idx} className={styles.chartBarGroup}>
+                                                    <div
+                                                        className={styles.chartBar}
+                                                        style={{ height: d.height }}
+                                                        data-value={d.value}
+                                                    />
+                                                    <span className={styles.chartLabel}>{d.label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
 
-                                        {selectedSession?.session_id === session.session_id && (
-                                            <div className={styles.sessionDetailListInline} onClick={e => e.stopPropagation()}>
-                                                {session.workouts.map((w, idx) => {
-                                                    const workout = (w && typeof w === 'object') ? w : (workouts.find(p => p.id === w) || { name: 'Legacy Workout', duration: 0 });
-                                                    return (
-                                                        <div key={idx} className={styles.sessionDetailItemMini}>
-                                                            <div className={styles.detailInfo}>
-                                                                <span className={styles.detailName}>{workout.name}</span>
-                                                                <span className={styles.detailType} style={{ color: workout.type === 'gentle' ? '#a594f9' : '#00ff88' }}>
-                                                                    {workout.type === 'gentle' ? 'Yoga' : 'Standard'}
-                                                                </span>
-                                                            </div>
-                                                            <span className={styles.detailDuration}>
-                                                                {Math.floor((workout.duration || 0) / 60)}m {(workout.duration || 0) % 60}s
+                                {token && sessionHistory.length > 0 && (
+                                    <section className={styles.historySection}>
+                                        <h2 className={styles.sectionTitle}>Session History</h2>
+                                        <div className={styles.historyList}>
+                                            {sessionHistory.map(session => (
+                                                <div
+                                                    key={session.session_id}
+                                                    className={`${styles.historyItem} ${selectedSession?.session_id === session.session_id ? styles.historyItemExpanded : ''}`}
+                                                    onClick={() => setSelectedSession(selectedSession?.session_id === session.session_id ? null : session)}
+                                                >
+                                                    <div className={styles.historyMain}>
+                                                        <div className={styles.historyInfo}>
+                                                            <span className={styles.historyName}>{session.name}</span>
+                                                            <span className={styles.historyDate}>
+                                                                {(() => {
+                                                                    const date = session.created_at
+                                                                        ? new Date(session.created_at.replace(" ", "T") + "Z")
+                                                                        : new Date(parseInt(session.session_id));
+                                                                    return date.toLocaleDateString();
+                                                                })()}
                                                             </span>
                                                         </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                                        <div className={styles.historyControls}>
+                                                            <div className={styles.historyStats}>
+                                                                {session.workouts.length} workouts
+                                                            </div>
+                                                            <button
+                                                                className={styles.sessionDeleteBtn}
+                                                                onClick={(e) => deleteHistorySession(e, session.session_id)}
+                                                                title="Remove from history"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {selectedSession?.session_id === session.session_id && (
+                                                        <div className={styles.sessionDetailListInline} onClick={e => e.stopPropagation()}>
+                                                            {session.workouts.map((w, idx) => {
+                                                                const workout = (w && typeof w === 'object') ? w : (workouts.find(p => p.id === w) || { name: 'Legacy Workout', duration: 0 });
+                                                                return (
+                                                                    <div key={idx} className={styles.sessionDetailItemMini}>
+                                                                        <div className={styles.detailInfo}>
+                                                                            <span className={styles.detailName}>{workout.name}</span>
+                                                                            <span className={styles.detailType} style={{ color: workout.type === 'gentle' ? '#a594f9' : '#00ff88' }}>
+                                                                                {workout.type === 'gentle' ? 'Yoga' : 'Standard'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span className={styles.detailDuration}>
+                                                                            {Math.floor((workout.duration || 0) / 60)}m {(workout.duration || 0) % 60}s
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                            </>
+                        )}
+
+                        {activeTab === 'received' && (
+                            <ReceivedRoutines
+                                token={token}
+                                onImport={(newWorkouts) => {
+                                    setWorkouts(prev => [...prev, ...newWorkouts]);
+                                    setActiveTab('routines');
+                                }}
+                            />
+                        )}
+
+                        {activeTab === 'friends' && <FriendsPanel token={token} />}
+
+                        <section className={styles.educationSection}>
+                            <div className={styles.eduGrid}>
+                                <div className={styles.eduCard}>
+                                    <h3>Why Yoga Matters</h3>
+                                    <p>
+                                        Yoga is more than just physical movement. It is a path to mental clarity,
+                                        stress reduction, and holistic well-being. By aligning breath with movement,
+                                        you build a deeper connection between mind and body, fostering resilience
+                                        in every aspect of life.
+                                    </p>
+                                </div>
+                                <div className={styles.eduCard}>
+                                    <h3>The Power of Laya</h3>
+                                    <p>
+                                        <em>Laya</em> means rhythm or flow. In practice (<em>Abhyasa</em>),
+                                        maintaining a consistent rhythm is what transforms effort into effortless
+                                        grace. This tracker helps you visualize your consistency, ensuring that
+                                        your rhythm remains steady as you grow.
+                                    </p>
+                                </div>
                             </div>
                         </section>
-                    )}
 
-                    <section className={styles.educationSection}>
-                        <div className={styles.eduGrid}>
-                            <div className={styles.eduCard}>
-                                <h3>Why Yoga Matters</h3>
-                                <p>
-                                    Yoga is more than just physical movement. It is a path to mental clarity,
-                                    stress reduction, and holistic well-being. By aligning breath with movement,
-                                    you build a deeper connection between mind and body, fostering resilience
-                                    in every aspect of life.
-                                </p>
-                            </div>
-                            <div className={styles.eduCard}>
-                                <h3>The Power of Laya</h3>
-                                <p>
-                                    <em>Laya</em> means rhythm or flow. In practice (<em>Abhyasa</em>),
-                                    maintaining a consistent rhythm is what transforms effort into effortless
-                                    grace. This tracker helps you visualize your consistency, ensuring that
-                                    your rhythm remains steady as you grow.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
 
-                    {isLoginOpen && (
-                        <div className={styles.modalOverlay}>
-                            <div className={styles.modalContent}>
-                                <h2>{isSignup ? "Create Account" : "Sync Workouts"}</h2>
-                                <form onSubmit={handleLogin}>
-                                    <input
-                                        type="email"
-                                        value={loginEmail}
-                                        onChange={(e) => setLoginEmail(e.target.value)}
-                                        required
-                                        placeholder="Email"
-                                    />
-                                    <input
-                                        type="password"
-                                        value={loginPassword}
-                                        onChange={(e) => setLoginPassword(e.target.value)}
-                                        required
-                                        placeholder="Password"
-                                        style={{ marginTop: '1rem' }}
-                                    />
-                                    {isSignup && (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={signupDisplayName}
-                                                onChange={(e) => setSignupDisplayName(e.target.value)}
-                                                placeholder="Unique Display Name"
-                                                required
-                                                style={{ marginTop: '1rem' }}
-                                            />
-                                            <select
-                                                value={signupAgeRange}
-                                                onChange={(e) => setSignupAgeRange(e.target.value)}
-                                                style={{ marginTop: '1rem' }}
-                                            >
-                                                <option value="">Age Range (Optional)</option>
-                                                <option value="<18">&lt;18</option>
-                                                <option value="18-24">18-24</option>
-                                                <option value="25-30">25-30</option>
-                                                <option value="31-40">31-40</option>
-                                                <option value="41-50">41-50</option>
-                                                <option value="51-60">51-60</option>
-                                            </select>
-                                            <select
-                                                value={signupGender}
-                                                onChange={(e) => setSignupGender(e.target.value)}
-                                                style={{ marginTop: '1rem' }}
-                                            >
-                                                <option value="">Gender (Optional)</option>
-                                                <option value="male">Male</option>
-                                                <option value="female">Female</option>
-                                                <option value="other">Other</option>
-                                                <option value="prefer_not_to_say">Prefer not to say</option>
-                                            </select>
-                                            <input
-                                                type="text"
-                                                value={signupZip}
-                                                onChange={(e) => setSignupZip(e.target.value)}
-                                                placeholder="Zip Code (Optional)"
-                                                style={{ marginTop: '1rem' }}
-                                            />
-                                        </>
-                                    )}
-                                    <div className={styles.modalActions}>
-                                        <button type="button" onClick={() => setIsLoginOpen(false)}>Cancel</button>
-                                        <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
-                                            {isSyncing ? "..." : (isSignup ? "Sign Up" : "Login")}
-                                        </button>
-                                    </div>
-                                    <div className={styles.authLinksContainer}>
-                                        <p>
-                                            {isSignup ? "Already have an account?" : "No account yet?"}{" "}
-                                            <span onClick={() => setIsSignup(!isSignup)}>
-                                                {isSignup ? "Login" : "Sign Up"}
-                                            </span>
-                                        </p>
-                                        {!isSignup && (
-                                            <p>
-                                                <span onClick={() => { setIsLoginOpen(false); setIsResetMode(true); setResetStep('request'); }}>
-                                                    Forgot Password?
-                                                </span>
-                                            </p>
-                                        )}
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {isProfileModalOpen && (
-                        <div className={styles.modalOverlay}>
-                            <div className={styles.modalContent}>
-                                <h2>Update Profile</h2>
-                                <form onSubmit={handleUpdateProfile}>
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <label style={{ fontSize: '0.8rem', color: 'rgba(0,0,0,0.6)', marginLeft: '4px' }}>Display Name (Unique)</label>
-                                        <input
-                                            type="text"
-                                            value={signupDisplayName}
-                                            onChange={(e) => setSignupDisplayName(e.target.value)}
-                                            placeholder="Display Name"
-                                            style={{ marginTop: '0.3rem' }}
-                                        />
-                                    </div>
-                                    <select
-                                        value={signupAgeRange}
-                                        onChange={(e) => setSignupAgeRange(e.target.value)}
-                                    >
-                                        <option value="">Age Range (Optional)</option>
-                                        <option value="<18">&lt;18</option>
-                                        <option value="18-24">18-24</option>
-                                        <option value="25-30">25-30</option>
-                                        <option value="31-40">31-40</option>
-                                        <option value="41-50">41-50</option>
-                                        <option value="51-60">51-60</option>
-                                    </select>
-                                    <select
-                                        value={signupGender}
-                                        onChange={(e) => setSignupGender(e.target.value)}
-                                        style={{ marginTop: '1rem' }}
-                                    >
-                                        <option value="">Gender (Optional)</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
-                                        <option value="prefer_not_to_say">Prefer not to say</option>
-                                    </select>
-                                    <input
-                                        type="text"
-                                        value={signupZip}
-                                        onChange={(e) => setSignupZip(e.target.value)}
-                                        placeholder="Zip Code (Optional)"
-                                        style={{ marginTop: '1rem' }}
-                                    />
-                                    <div className={styles.modalActions}>
-                                        <button type="button" onClick={() => setIsProfileModalOpen(false)}>Cancel</button>
-                                        <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
-                                            {isSyncing ? "..." : "Save Profile"}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {isModalOpen && (
-                        <div className={styles.modalOverlay}>
-                            <div className={styles.modalContent}>
-                                <h2>{editingId ? 'Edit Workout' : 'New Workout'}</h2>
-                                <form onSubmit={handleSave}>
-                                    <input
-                                        type="text"
-                                        value={modalData.name}
-                                        onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
-                                        required
-                                        placeholder="Workout Name"
-                                    />
-                                    <div className={styles.formRow}>
-                                        <label>
-                                            Secs
-                                            <input
-                                                type="number"
-                                                value={modalData.duration}
-                                                onChange={(e) => setModalData({ ...modalData, duration: parseInt(e.target.value) })}
-                                            />
-                                        </label>
-                                        <label>
-                                            Type
-                                            <select value={modalData.type} onChange={(e) => setModalData({ ...modalData, type: e.target.value })}>
-                                                <option value="high">Standard</option>
-                                                <option value="gentle">Yoga</option>
-                                            </select>
-                                        </label>
-                                        <label>
-                                            Chime
-                                            <select value={modalData.chime} onChange={(e) => setModalData({ ...modalData, chime: e.target.value })}>
-                                                <option value="high">Standard (Beep)</option>
-                                                <option value="gentle">Yoga (Chime/Gong)</option>
-                                            </select>
-                                        </label>
-                                    </div>
-                                    <div className={styles.modalActions}>
-                                        <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                        <button type="submit" className={styles.saveBtn}>Save</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {isResetMode && (
-                        <div className={styles.modalOverlay}>
-                            <div className={styles.modalContent}>
-                                <h2>{resetStep === 'request' ? 'Reset Password' : 'Enter Reset Code'}</h2>
-                                {resetStep === 'request' ? (
-                                    <form onSubmit={handleRequestReset}>
-                                        <input
-                                            type="email"
-                                            value={resetEmail}
-                                            onChange={(e) => setResetEmail(e.target.value)}
-                                            required
-                                            placeholder="Email"
-                                        />
-                                        <div className={styles.modalActions}>
-                                            <button type="button" onClick={() => { setIsResetMode(false); setResetEmail(''); }}>Cancel</button>
-                                            <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
-                                                {isSyncing ? "..." : "Send Reset Code"}
-                                            </button>
-                                        </div>
-                                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', marginTop: '1rem', textAlign: 'center' }}>
-                                            Check server console for reset code
-                                        </p>
-                                    </form>
-                                ) : (
-                                    <form onSubmit={handleResetPassword}>
-                                        <input
-                                            type="text"
-                                            value={resetCode}
-                                            onChange={(e) => setResetCode(e.target.value)}
-                                            required
-                                            placeholder="6-Digit Reset Code"
-                                            maxLength="6"
-                                        />
-                                        <input
-                                            type="password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            required
-                                            placeholder="New Password"
-                                            style={{ marginTop: '1rem' }}
-                                        />
-                                        <div className={styles.modalActions}>
-                                            <button type="button" onClick={() => { setResetStep('request'); setResetCode(''); setNewPassword(''); }}>Back</button>
-                                            <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
-                                                {isSyncing ? "..." : "Reset Password"}
-                                            </button>
-                                        </div>
-                                    </form>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </main>
+                    </main>
             ) : (
                 <Timer
                     workoutName={activeWorkout.name}
@@ -1629,6 +1532,260 @@ function App() {
                     </div>
                 )
             }
+
+            {isLoginOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2>{isSignup ? "Create Account" : "Sync Workouts"}</h2>
+                        <form onSubmit={handleLogin}>
+                            <input
+                                type="email"
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                required
+                                placeholder="Email"
+                            />
+                            <input
+                                type="password"
+                                value={loginPassword}
+                                onChange={(e) => setLoginPassword(e.target.value)}
+                                required
+                                placeholder="Password"
+                                style={{ marginTop: '1rem' }}
+                            />
+                            {isSignup && (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={signupDisplayName}
+                                        onChange={(e) => setSignupDisplayName(e.target.value)}
+                                        placeholder="Unique Display Name"
+                                        required
+                                        style={{ marginTop: '1rem' }}
+                                    />
+                                    <select
+                                        value={signupAgeRange}
+                                        onChange={(e) => setSignupAgeRange(e.target.value)}
+                                        style={{ marginTop: '1rem' }}
+                                    >
+                                        <option value="">Age Range (Optional)</option>
+                                        <option value="<18">&lt;18</option>
+                                        <option value="18-24">18-24</option>
+                                        <option value="25-30">25-30</option>
+                                        <option value="31-40">31-40</option>
+                                        <option value="41-50">41-50</option>
+                                        <option value="51-60">51-60</option>
+                                    </select>
+                                    <select
+                                        value={signupGender}
+                                        onChange={(e) => setSignupGender(e.target.value)}
+                                        style={{ marginTop: '1rem' }}
+                                    >
+                                        <option value="">Gender (Optional)</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                        <option value="prefer_not_to_say">Prefer not to say</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        value={signupZip}
+                                        onChange={(e) => setSignupZip(e.target.value)}
+                                        placeholder="Zip Code (Optional)"
+                                        style={{ marginTop: '1rem' }}
+                                    />
+                                </>
+                            )}
+                            <div className={styles.modalActions}>
+                                <button type="button" onClick={() => setIsLoginOpen(false)}>Cancel</button>
+                                <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                    {isSyncing ? "..." : (isSignup ? "Sign Up" : "Login")}
+                                </button>
+                            </div>
+                            <div className={styles.authLinksContainer}>
+                                <p>
+                                    {isSignup ? "Already have an account?" : "No account yet?"}{" "}
+                                    <span onClick={() => setIsSignup(!isSignup)}>
+                                        {isSignup ? "Login" : "Sign Up"}
+                                    </span>
+                                </p>
+                                {!isSignup && (
+                                    <p>
+                                        <span onClick={() => { setIsLoginOpen(false); setIsResetMode(true); setResetStep('request'); }}>
+                                            Forgot Password?
+                                        </span>
+                                    </p>
+                                )}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isProfileModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2>Update Profile</h2>
+                        <form onSubmit={handleUpdateProfile}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ fontSize: '0.8rem', color: 'rgba(0,0,0,0.6)', marginLeft: '4px' }}>Display Name (Unique)</label>
+                                <input
+                                    type="text"
+                                    value={signupDisplayName}
+                                    onChange={(e) => setSignupDisplayName(e.target.value)}
+                                    placeholder="Display Name"
+                                    style={{ marginTop: '0.3rem' }}
+                                />
+                            </div>
+                            <select
+                                value={signupAgeRange}
+                                onChange={(e) => setSignupAgeRange(e.target.value)}
+                            >
+                                <option value="">Age Range (Optional)</option>
+                                <option value="<18">&lt;18</option>
+                                <option value="18-24">18-24</option>
+                                <option value="25-30">25-30</option>
+                                <option value="31-40">31-40</option>
+                                <option value="41-50">41-50</option>
+                                <option value="51-60">51-60</option>
+                            </select>
+                            <select
+                                value={signupGender}
+                                onChange={(e) => setSignupGender(e.target.value)}
+                                style={{ marginTop: '1rem' }}
+                            >
+                                <option value="">Gender (Optional)</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                            <input
+                                type="text"
+                                value={signupZip}
+                                onChange={(e) => setSignupZip(e.target.value)}
+                                placeholder="Zip Code (Optional)"
+                                style={{ marginTop: '1rem' }}
+                            />
+                            <div className={styles.modalActions}>
+                                <button type="button" onClick={() => setIsProfileModalOpen(false)}>Cancel</button>
+                                <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                    {isSyncing ? "..." : "Save Profile"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2>{editingId ? 'Edit Workout' : 'New Workout'}</h2>
+                        <form onSubmit={handleSave}>
+                            <input
+                                type="text"
+                                value={modalData.name}
+                                onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
+                                required
+                                placeholder="Workout Name"
+                            />
+                            <div className={styles.formRow}>
+                                <label>
+                                    Secs
+                                    <input
+                                        type="number"
+                                        value={modalData.duration}
+                                        onChange={(e) => setModalData({ ...modalData, duration: parseInt(e.target.value) })}
+                                    />
+                                </label>
+                                <label>
+                                    Type
+                                    <select value={modalData.type} onChange={(e) => setModalData({ ...modalData, type: e.target.value })}>
+                                        <option value="high">Standard</option>
+                                        <option value="gentle">Yoga</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    Chime
+                                    <select value={modalData.chime} onChange={(e) => setModalData({ ...modalData, chime: e.target.value })}>
+                                        <option value="high">Standard (Beep)</option>
+                                        <option value="gentle">Yoga (Chime/Gong)</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                <button type="submit" className={styles.saveBtn}>Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isResetMode && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2>{resetStep === 'request' ? 'Reset Password' : 'Enter Reset Code'}</h2>
+                        {resetStep === 'request' ? (
+                            <form onSubmit={handleRequestReset}>
+                                <input
+                                    type="email"
+                                    value={resetEmail}
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    required
+                                    placeholder="Email"
+                                />
+                                <div className={styles.modalActions}>
+                                    <button type="button" onClick={() => { setIsResetMode(false); setResetEmail(''); }}>Cancel</button>
+                                    <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                        {isSyncing ? "..." : "Send Reset Code"}
+                                    </button>
+                                </div>
+                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', marginTop: '1rem', textAlign: 'center' }}>
+                                    Check server console for reset code
+                                </p>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleResetPassword}>
+                                <input
+                                    type="text"
+                                    value={resetCode}
+                                    onChange={(e) => setResetCode(e.target.value)}
+                                    required
+                                    placeholder="6-Digit Reset Code"
+                                    maxLength="6"
+                                />
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
+                                    placeholder="New Password"
+                                    style={{ marginTop: '1rem' }}
+                                />
+                                <div className={styles.modalActions}>
+                                    <button type="button" onClick={() => { setResetStep('request'); setResetCode(''); setNewPassword(''); }}>Back</button>
+                                    <button type="submit" className={styles.saveBtn} disabled={isSyncing}>
+                                        {isSyncing ? "..." : "Reset Password"}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Routine Sharing Modals */}
+            {isShareModalOpen && (
+                <ShareRoutineModal
+                    workouts={workouts}
+                    token={token}
+                    onClose={() => setIsShareModalOpen(false)}
+                />
+            )}
+
+
         </div >
     );
 }
