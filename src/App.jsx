@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Timer from './components/timer/Timer';
 import AdminPanel from './components/admin/AdminPanel';
-import LandingPage from './components/landing/LandingPage';
+
 import ShareRoutineModal from './components/ShareRoutineModal';
 import FriendsPanel from './components/FriendsPanel';
 import ReceivedRoutines from './components/ReceivedRoutines';
@@ -909,457 +909,454 @@ function App() {
     return (
         <div className={styles.container}>
             {!activeWorkout ? (
-                (!user && !hasEnteredApp) ?
-                    <LandingPage onStart={() => setHasEnteredApp(true)} onLogin={() => setIsLoginOpen(true)} />
-                    :
-                    <main className={styles.dashboard}>
-                        {!user && (
-                            <div className={styles.guestBanner}>
-                                <span>Welcome to Guest Mode.</span>
-                                <span onClick={() => setIsLoginOpen(true)}><strong>Login or Register</strong></span>
-                                <span>to save your flow.</span>
+                <main className={styles.dashboard}>
+                    {!user && (
+                        <div className={styles.guestBanner}>
+                            <span>Welcome to Guest Mode.</span>
+                            <span onClick={() => setIsLoginOpen(true)}><strong>Login or Register</strong></span>
+                            <span>to save your flow.</span>
+                        </div>
+                    )}
+                    <header className={styles.header}>
+                        <div className={styles.titleSection}>
+                            <div className={styles.brandGroup}>
+                                <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto' }} />
+                                <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
                             </div>
-                        )}
-                        <header className={styles.header}>
-                            <div className={styles.titleSection}>
-                                <div className={styles.brandGroup}>
-                                    <img src="/logo.png" alt="Flow Laya Logo" style={{ width: '240px', height: 'auto' }} />
-                                    <h1 className={styles.title}>Dashboard {isSyncing && <span className={styles.syncing}>◌</span>}</h1>
-                                </div>
-                                <div className={styles.subtitle}>Practice in rhythm</div>
+                            <div className={styles.subtitle}>Practice in rhythm</div>
 
-                            </div>
-
-                            <div className={styles.userControls}>
-                                {user ? (() => {
-                                    const email = typeof user === 'object' ? user?.email : user;
-                                    const age = typeof user === 'object' ? user?.age_range : null;
-                                    const gender = typeof user === 'object' ? user?.gender : null;
-                                    const zip = typeof user === 'object' ? user?.zip : null;
-
-                                    let score = 0;
-                                    if (email) score += 25;
-                                    if (age) score += 25;
-                                    if (gender) score += 25;
-                                    if (zip) score += 25;
-
-                                    return (
-                                        <div
-                                            className={styles.userInfo}
-                                            style={{
-                                                background: score > 0 ? `linear-gradient(to right, rgba(123, 47, 247, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)` : 'rgba(0, 0, 0, 0.02)',
-                                                border: `1px solid rgba(123, 47, 247, ${score / 200 + 0.1})`
-                                            }}
-                                        >
-                                            <div className={styles.userMainInfo}>
-                                                <div className={styles.userCore}>
-                                                    <span className={styles.displayName}>{user.display_name || email}</span>
-                                                    <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                                            <polyline points="16 17 21 12 16 7"></polyline>
-                                                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                                {userRank && (
-                                                    <div className={styles.rankBadge}>
-                                                        Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
-                                                    </div>
-                                                )}
-                                                <div className={styles.subscriptionBadge}
-                                                    style={{
-                                                        background: subscriptionTier === 'paid'
-                                                            ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-                                                            : (subscriptionTier === 'trial' ? 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)' : 'transparent'),
-                                                        color: subscriptionTier === 'free' ? '#888' : (subscriptionTier === 'paid' ? '#333' : '#fff'),
-                                                        padding: '0.25rem 0.6rem',
-                                                        borderRadius: '12px',
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: '600',
-                                                        cursor: subscriptionTier === 'free' ? 'pointer' : 'default'
-                                                    }}
-                                                    onClick={() => subscriptionTier === 'free' && setIsSubscriptionModalOpen(true)}
-                                                    title={subscriptionTier === 'free' ? 'Click to upgrade' : (subscriptionTier === 'trial' ? 'Trial Active' : 'Pro member')}
-                                                >
-                                                    {subscriptionTier === 'paid' ? '✨ Pro' : (subscriptionTier === 'trial' ? '⏳ Trial' : '⭐ Free')}
-                                                </div>
-                                            </div>
-                                            <div className={styles.profileCompleteness}>
-                                                <div className={styles.completenessBadge} title="Profile Completeness">
-                                                    {score}%
-                                                    <span
-                                                        className={styles.completeNow}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSignupAgeRange(user.age_range || '');
-                                                            setSignupGender(user.gender || '');
-                                                            setSignupZip(user.zip || '');
-                                                            setSignupDisplayName(user.display_name || '');
-                                                            setIsProfileModalOpen(true);
-                                                        }}
-                                                    >
-                                                        {score < 100 ? "Complete" : "Edit"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })() : (
-                                    <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
-                                )}
-
-                                <div className={styles.portability}>
-                                    <button onClick={handleExport} className={styles.portBtn}>Export Data</button>
-                                    <label className={styles.portBtn}>
-                                        Import Data
-                                        <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-                                    </label>
-                                </div>
-
-                                {user && workouts.length > 0 && (
-                                    <div className={styles.portability} style={{ marginTop: '0.5rem' }}>
-                                        <button
-                                            onClick={() => setIsShareModalOpen(true)}
-                                            className={styles.portBtn}
-                                            style={{ background: 'rgba(123, 47, 247, 0.15)', border: '1px solid rgba(123, 47, 247, 0.3)' }}
-                                        >
-                                            📤 Share Routine
-                                        </button>
-
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className={styles.settingsSection}>
-                                {user && (
-                                    <select
-                                        onChange={(e) => selectTemplate(e.target.value)}
-                                        style={{
-                                            padding: '0.4rem 0.8rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid rgba(123, 47, 247, 0.3)',
-                                            background: 'rgba(123, 47, 247, 0.15)',
-                                            color: '#7b2ff7',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            outline: 'none',
-                                            fontWeight: '600'
-                                        }}
-                                        defaultValue=""
-                                    >
-                                        <option value="" disabled>Load Template...</option>
-                                        <option value="custom">My Custom Routine</option>
-                                        <option disabled>──────────</option>
-                                        <option value="15min-morning-flow">15-Minute Morning Flow</option>
-                                        <option value="30min-energizing-flow">30-Minute Energizing Flow</option>
-                                        <option value="45min-complete-practice">45-Minute Complete Practice</option>
-                                        <option value="60min-full-practice">60-Minute Full Practice</option>
-                                    </select>
-                                )}
-                                {selectedTemplate && (
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.35rem 0.8rem',
-                                        background: 'rgba(123, 47, 247, 0.08)',
-                                        border: '1px solid rgba(123, 47, 247, 0.2)',
-                                        borderRadius: '8px',
-                                        fontSize: '0.75rem',
-                                        color: '#7b2ff7'
-                                    }}>
-                                        <span>✓ {selectedTemplate === 'custom' ? 'Custom Routine' :
-                                            selectedTemplate === '15min-morning-flow' ? '15-Min Flow' :
-                                                selectedTemplate === '30min-energizing-flow' ? '30-Min Flow' :
-                                                    selectedTemplate === '45min-complete-practice' ? '45-Min Practice' :
-                                                        selectedTemplate === '60min-full-practice' ? '60-Min Practice' : 'Template'
-                                        }</span>
-                                        <button
-                                            onClick={clearTemplateSelection}
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                color: '#7b2ff7',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                padding: '0',
-                                                lineHeight: '1'
-                                            }}
-                                            title="Clear template selection"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                )}
-                                <div className={styles.settingsSubRow}>
-                                    <label className={styles.settingToggle}>
-                                        <input
-                                            type="checkbox"
-                                            checked={muteBeeps}
-                                            onChange={(e) => {
-                                                const val = e.target.checked;
-                                                setMuteBeeps(val);
-                                                localStorage.setItem('muteBeeps', val);
-                                            }}
-                                        />
-                                        <span>Mute Countdown Beeps</span>
-                                    </label>
-                                    <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
-                                </div>
-                            </div>
-                        </header>
-
-                        <div className={styles.tabsContainer}>
-                            <button
-                                className={`${styles.tabButton} ${activeTab === 'routines' ? styles.active : ''}`}
-                                onClick={() => setActiveTab('routines')}
-                            >
-                                My Routines
-                            </button>
-                            <button
-                                className={`${styles.tabButton} ${activeTab === 'received' ? styles.active : ''}`}
-                                onClick={() => setActiveTab('received')}
-                            >
-                                Received Routines
-                            </button>
-                            <button
-                                className={`${styles.tabButton} ${activeTab === 'friends' ? styles.active : ''}`}
-                                onClick={() => setActiveTab('friends')}
-                            >
-                                Friends & Sharing
-                            </button>
                         </div>
 
-                        {activeTab === 'routines' && (
-                            <>
-                                {nextWorkoutPending && (
-                                    <section className={styles.nextWorkoutSection}>
-                                        <div className={styles.nextWorkoutCard}>
-                                            <div className={styles.nextWorkoutInfo}>
-                                                <span className={styles.nextLabel}>Next Up</span>
-                                                <h3>{nextWorkoutPending.name}</h3>
-                                                <span className={styles.nextDuration}>{Math.floor(nextWorkoutPending.duration / 60)}m {nextWorkoutPending.duration % 60}s</span>
-                                            </div>
-                                            <button className={styles.startNextBtn} onClick={() => startWorkout(nextWorkoutPending)}>
-                                                Start Now
-                                            </button>
-                                        </div>
-                                    </section>
-                                )}
+                        <div className={styles.userControls}>
+                            {user ? (() => {
+                                const email = typeof user === 'object' ? user?.email : user;
+                                const age = typeof user === 'object' ? user?.age_range : null;
+                                const gender = typeof user === 'object' ? user?.gender : null;
+                                const zip = typeof user === 'object' ? user?.zip : null;
 
-                                <section className={styles.presetGrid}>
-                                    {workouts.map((workout, index) => (
-                                        <div
-                                            key={workout.id}
-                                            className={`
+                                let score = 0;
+                                if (email) score += 25;
+                                if (age) score += 25;
+                                if (gender) score += 25;
+                                if (zip) score += 25;
+
+                                return (
+                                    <div
+                                        className={styles.userInfo}
+                                        style={{
+                                            background: score > 0 ? `linear-gradient(to right, rgba(123, 47, 247, 0.15) ${score}%, rgba(0, 0, 0, 0.02) ${score}%)` : 'rgba(0, 0, 0, 0.02)',
+                                            border: `1px solid rgba(123, 47, 247, ${score / 200 + 0.1})`
+                                        }}
+                                    >
+                                        <div className={styles.userMainInfo}>
+                                            <div className={styles.userCore}>
+                                                <span className={styles.displayName}>{user.display_name || email}</span>
+                                                <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                                        <polyline points="16 17 21 12 16 7"></polyline>
+                                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            {userRank && (
+                                                <div className={styles.rankBadge}>
+                                                    Rank: #{userRank.rankWeek} (W) | #{userRank.rankMonth} (M)
+                                                </div>
+                                            )}
+                                            <div className={styles.subscriptionBadge}
+                                                style={{
+                                                    background: subscriptionTier === 'paid'
+                                                        ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                                                        : (subscriptionTier === 'trial' ? 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)' : 'transparent'),
+                                                    color: subscriptionTier === 'free' ? '#888' : (subscriptionTier === 'paid' ? '#333' : '#fff'),
+                                                    padding: '0.25rem 0.6rem',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    cursor: subscriptionTier === 'free' ? 'pointer' : 'default'
+                                                }}
+                                                onClick={() => subscriptionTier === 'free' && setIsSubscriptionModalOpen(true)}
+                                                title={subscriptionTier === 'free' ? 'Click to upgrade' : (subscriptionTier === 'trial' ? 'Trial Active' : 'Pro member')}
+                                            >
+                                                {subscriptionTier === 'paid' ? '✨ Pro' : (subscriptionTier === 'trial' ? '⏳ Trial' : '⭐ Free')}
+                                            </div>
+                                        </div>
+                                        <div className={styles.profileCompleteness}>
+                                            <div className={styles.completenessBadge} title="Profile Completeness">
+                                                {score}%
+                                                <span
+                                                    className={styles.completeNow}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSignupAgeRange(user.age_range || '');
+                                                        setSignupGender(user.gender || '');
+                                                        setSignupZip(user.zip || '');
+                                                        setSignupDisplayName(user.display_name || '');
+                                                        setIsProfileModalOpen(true);
+                                                    }}
+                                                >
+                                                    {score < 100 ? "Complete" : "Edit"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })() : (
+                                <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
+                            )}
+
+                            <div className={styles.portability}>
+                                <button onClick={handleExport} className={styles.portBtn}>Export Data</button>
+                                <label className={styles.portBtn}>
+                                    Import Data
+                                    <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+                                </label>
+                            </div>
+
+                            {user && workouts.length > 0 && (
+                                <div className={styles.portability} style={{ marginTop: '0.5rem' }}>
+                                    <button
+                                        onClick={() => setIsShareModalOpen(true)}
+                                        className={styles.portBtn}
+                                        style={{ background: 'rgba(123, 47, 247, 0.15)', border: '1px solid rgba(123, 47, 247, 0.3)' }}
+                                    >
+                                        📤 Share Routine
+                                    </button>
+
+                                </div>
+                            )}
+                        </div>
+
+                        <div className={styles.settingsSection}>
+                            {user && (
+                                <select
+                                    onChange={(e) => selectTemplate(e.target.value)}
+                                    style={{
+                                        padding: '0.4rem 0.8rem',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(123, 47, 247, 0.3)',
+                                        background: 'rgba(123, 47, 247, 0.15)',
+                                        color: '#7b2ff7',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                        fontWeight: '600'
+                                    }}
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Load Template...</option>
+                                    <option value="custom">My Custom Routine</option>
+                                    <option disabled>──────────</option>
+                                    <option value="15min-morning-flow">15-Minute Morning Flow</option>
+                                    <option value="30min-energizing-flow">30-Minute Energizing Flow</option>
+                                    <option value="45min-complete-practice">45-Minute Complete Practice</option>
+                                    <option value="60min-full-practice">60-Minute Full Practice</option>
+                                </select>
+                            )}
+                            {selectedTemplate && (
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.35rem 0.8rem',
+                                    background: 'rgba(123, 47, 247, 0.08)',
+                                    border: '1px solid rgba(123, 47, 247, 0.2)',
+                                    borderRadius: '8px',
+                                    fontSize: '0.75rem',
+                                    color: '#7b2ff7'
+                                }}>
+                                    <span>✓ {selectedTemplate === 'custom' ? 'Custom Routine' :
+                                        selectedTemplate === '15min-morning-flow' ? '15-Min Flow' :
+                                            selectedTemplate === '30min-energizing-flow' ? '30-Min Flow' :
+                                                selectedTemplate === '45min-complete-practice' ? '45-Min Practice' :
+                                                    selectedTemplate === '60min-full-practice' ? '60-Min Practice' : 'Template'
+                                    }</span>
+                                    <button
+                                        onClick={clearTemplateSelection}
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: '#7b2ff7',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            padding: '0',
+                                            lineHeight: '1'
+                                        }}
+                                        title="Clear template selection"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            )}
+                            <div className={styles.settingsSubRow}>
+                                <label className={styles.settingToggle}>
+                                    <input
+                                        type="checkbox"
+                                        checked={muteBeeps}
+                                        onChange={(e) => {
+                                            const val = e.target.checked;
+                                            setMuteBeeps(val);
+                                            localStorage.setItem('muteBeeps', val);
+                                        }}
+                                    />
+                                    <span>Mute Countdown Beeps</span>
+                                </label>
+                                <div className={styles.totalTime}>{totalDurationMinutes} min total</div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className={styles.tabsContainer}>
+                        <button
+                            className={`${styles.tabButton} ${activeTab === 'routines' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('routines')}
+                        >
+                            My Routines
+                        </button>
+                        <button
+                            className={`${styles.tabButton} ${activeTab === 'received' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('received')}
+                        >
+                            Received Routines
+                        </button>
+                        <button
+                            className={`${styles.tabButton} ${activeTab === 'friends' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('friends')}
+                        >
+                            Friends & Sharing
+                        </button>
+                    </div>
+
+                    {activeTab === 'routines' && (
+                        <>
+                            {nextWorkoutPending && (
+                                <section className={styles.nextWorkoutSection}>
+                                    <div className={styles.nextWorkoutCard}>
+                                        <div className={styles.nextWorkoutInfo}>
+                                            <span className={styles.nextLabel}>Next Up</span>
+                                            <h3>{nextWorkoutPending.name}</h3>
+                                            <span className={styles.nextDuration}>{Math.floor(nextWorkoutPending.duration / 60)}m {nextWorkoutPending.duration % 60}s</span>
+                                        </div>
+                                        <button className={styles.startNextBtn} onClick={() => startWorkout(nextWorkoutPending)}>
+                                            Start Now
+                                        </button>
+                                    </div>
+                                </section>
+                            )}
+
+                            <section className={styles.presetGrid}>
+                                {workouts.map((workout, index) => (
+                                    <div
+                                        key={workout.id}
+                                        className={`
                                     ${styles.presetCard} 
                                     ${workout.type === 'gentle' ? styles.cardGentle : ''}
                                     ${completedWorkouts.includes(workout.id) ? styles.cardCompleted : ''}
                                 `}
-                                            onClick={() => startWorkout(workout)}
-                                        >
-                                            <div className={styles.cardActions}>
-                                                <div className={styles.reorderGroup}>
-                                                    <button
-                                                        className={styles.reorderBtn}
-                                                        onClick={(e) => moveWorkout(e, index, -1)}
-                                                        disabled={index === 0}
-                                                    >
-                                                        ‹
-                                                    </button>
-                                                    <button
-                                                        className={styles.reorderBtn}
-                                                        onClick={(e) => moveWorkout(e, index, 1)}
-                                                        disabled={index === workouts.length - 1}
-                                                    >
-                                                        ›
-                                                    </button>
-                                                </div>
-                                                <button className={styles.editBtn} onClick={(e) => startEditing(e, workout)}>✎</button>
-                                                <button className={styles.deleteBtn} onClick={(e) => deleteWorkout(e, workout.id)}>×</button>
+                                        onClick={() => startWorkout(workout)}
+                                    >
+                                        <div className={styles.cardActions}>
+                                            <div className={styles.reorderGroup}>
+                                                <button
+                                                    className={styles.reorderBtn}
+                                                    onClick={(e) => moveWorkout(e, index, -1)}
+                                                    disabled={index === 0}
+                                                >
+                                                    ‹
+                                                </button>
+                                                <button
+                                                    className={styles.reorderBtn}
+                                                    onClick={(e) => moveWorkout(e, index, 1)}
+                                                    disabled={index === workouts.length - 1}
+                                                >
+                                                    ›
+                                                </button>
                                             </div>
-                                            <h3 className={styles.presetName}>{workout.name}</h3>
-                                            <div className={styles.presetDetails}>
-                                                <span className={styles.presetTime}>{Math.floor(workout.duration / 60)}m</span>
-                                                {workout.type === 'gentle' && <span className={styles.tagGentle}>Yoga</span>}
-                                            </div>
+                                            <button className={styles.editBtn} onClick={(e) => startEditing(e, workout)}>✎</button>
+                                            <button className={styles.deleteBtn} onClick={(e) => deleteWorkout(e, workout.id)}>×</button>
                                         </div>
-                                    ))}
-                                    <div className={styles.addCard} onClick={startCreating}>+</div>
-                                </section>
+                                        <h3 className={styles.presetName}>{workout.name}</h3>
+                                        <div className={styles.presetDetails}>
+                                            <span className={styles.presetTime}>{Math.floor(workout.duration / 60)}m</span>
+                                            {workout.type === 'gentle' && <span className={styles.tagGentle}>Yoga</span>}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className={styles.addCard} onClick={startCreating}>+</div>
+                            </section>
 
-                                <section className={styles.statsSection}>
-                                    <div className={styles.statsRow}>
-                                        <div className={styles.statBox}>
-                                            <span className={styles.statValue}>{completedWorkouts.length}</span>
-                                            <span className={styles.statLabel}>Completed</span>
-                                        </div>
-                                        <div className={styles.statBox}>
-                                            <span className={styles.statValue}>
-                                                {Math.round(completedWorkouts.reduce((acc, id) => {
-                                                    const w = workouts.find(work => work.id === id);
-                                                    return acc + (w ? w.duration : 0);
-                                                }, 0) / 60)}
-                                            </span>
-                                            <span className={styles.statLabel}>Total Min</span>
-                                        </div>
-                                        <div className={styles.statActions}>
+                            <section className={styles.statsSection}>
+                                <div className={styles.statsRow}>
+                                    <div className={styles.statBox}>
+                                        <span className={styles.statValue}>{completedWorkouts.length}</span>
+                                        <span className={styles.statLabel}>Completed</span>
+                                    </div>
+                                    <div className={styles.statBox}>
+                                        <span className={styles.statValue}>
+                                            {Math.round(completedWorkouts.reduce((acc, id) => {
+                                                const w = workouts.find(work => work.id === id);
+                                                return acc + (w ? w.duration : 0);
+                                            }, 0) / 60)}
+                                        </span>
+                                        <span className={styles.statLabel}>Total Min</span>
+                                    </div>
+                                    <div className={styles.statActions}>
+                                        <button
+                                            onClick={saveSession}
+                                            className={styles.sessionBtn}
+                                            disabled={completedWorkouts.length === 0 || isSavingSession || !token}
+                                            title={!token ? "Login to save sessions" : ""}
+                                        >
+                                            {isSavingSession ? "..." : "Save Session"}
+                                        </button>
+                                        <button
+                                            onClick={startNewSession}
+                                            className={styles.sessionBtn}
+                                            disabled={completedWorkouts.length === 0}
+                                        >
+                                            New Session
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {user && (
+                                <section className={styles.statsChartSection}>
+                                    <div className={styles.chartHeader}>
+                                        <h3>Your Activity</h3>
+                                        <div className={styles.timeframeToggle}>
                                             <button
-                                                onClick={saveSession}
-                                                className={styles.sessionBtn}
-                                                disabled={completedWorkouts.length === 0 || isSavingSession || !token}
-                                                title={!token ? "Login to save sessions" : ""}
+                                                className={`${styles.timeframeBtn} ${statsTimeframe === 'week' ? styles.timeframeBtnActive : ''}`}
+                                                onClick={() => setStatsTimeframe('week')}
                                             >
-                                                {isSavingSession ? "..." : "Save Session"}
+                                                Week
                                             </button>
                                             <button
-                                                onClick={startNewSession}
-                                                className={styles.sessionBtn}
-                                                disabled={completedWorkouts.length === 0}
+                                                className={`${styles.timeframeBtn} ${statsTimeframe === 'month' ? styles.timeframeBtnActive : ''}`}
+                                                onClick={() => setStatsTimeframe('month')}
                                             >
-                                                New Session
+                                                Month
                                             </button>
                                         </div>
                                     </div>
-                                </section>
-
-                                {user && (
-                                    <section className={styles.statsChartSection}>
-                                        <div className={styles.chartHeader}>
-                                            <h3>Your Activity</h3>
-                                            <div className={styles.timeframeToggle}>
-                                                <button
-                                                    className={`${styles.timeframeBtn} ${statsTimeframe === 'week' ? styles.timeframeBtnActive : ''}`}
-                                                    onClick={() => setStatsTimeframe('week')}
-                                                >
-                                                    Week
-                                                </button>
-                                                <button
-                                                    className={`${styles.timeframeBtn} ${statsTimeframe === 'month' ? styles.timeframeBtnActive : ''}`}
-                                                    onClick={() => setStatsTimeframe('month')}
-                                                >
-                                                    Month
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className={styles.chartContainer}>
-                                            {getChartData().map((d, idx) => (
-                                                <div key={idx} className={styles.chartBarGroup}>
-                                                    <div
-                                                        className={styles.chartBar}
-                                                        style={{ height: d.height }}
-                                                        data-value={d.value}
-                                                    />
-                                                    <span className={styles.chartLabel}>{d.label}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-
-                                {token && sessionHistory.length > 0 && (
-                                    <section className={styles.historySection}>
-                                        <h2 className={styles.sectionTitle}>Session History</h2>
-                                        <div className={styles.historyList}>
-                                            {sessionHistory.map(session => (
+                                    <div className={styles.chartContainer}>
+                                        {getChartData().map((d, idx) => (
+                                            <div key={idx} className={styles.chartBarGroup}>
                                                 <div
-                                                    key={session.session_id}
-                                                    className={`${styles.historyItem} ${selectedSession?.session_id === session.session_id ? styles.historyItemExpanded : ''}`}
-                                                    onClick={() => setSelectedSession(selectedSession?.session_id === session.session_id ? null : session)}
-                                                >
-                                                    <div className={styles.historyMain}>
-                                                        <div className={styles.historyInfo}>
-                                                            <span className={styles.historyName}>{session.name}</span>
-                                                            <span className={styles.historyDate}>
-                                                                {(() => {
-                                                                    const date = session.created_at
-                                                                        ? new Date(session.created_at.replace(" ", "T") + "Z")
-                                                                        : new Date(parseInt(session.session_id));
-                                                                    return date.toLocaleDateString();
-                                                                })()}
-                                                            </span>
-                                                        </div>
-                                                        <div className={styles.historyControls}>
-                                                            <div className={styles.historyStats}>
-                                                                {session.workouts.length} workouts
-                                                            </div>
-                                                            <button
-                                                                className={styles.sessionDeleteBtn}
-                                                                onClick={(e) => deleteHistorySession(e, session.session_id)}
-                                                                title="Remove from history"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                                    className={styles.chartBar}
+                                                    style={{ height: d.height }}
+                                                    data-value={d.value}
+                                                />
+                                                <span className={styles.chartLabel}>{d.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
 
-                                                    {selectedSession?.session_id === session.session_id && (
-                                                        <div className={styles.sessionDetailListInline} onClick={e => e.stopPropagation()}>
-                                                            {session.workouts.map((w, idx) => {
-                                                                const workout = (w && typeof w === 'object') ? w : (workouts.find(p => p.id === w) || { name: 'Legacy Workout', duration: 0 });
-                                                                return (
-                                                                    <div key={idx} className={styles.sessionDetailItemMini}>
-                                                                        <div className={styles.detailInfo}>
-                                                                            <span className={styles.detailName}>{workout.name}</span>
-                                                                            <span className={styles.detailType} style={{ color: workout.type === 'gentle' ? '#a594f9' : '#00ff88' }}>
-                                                                                {workout.type === 'gentle' ? 'Yoga' : 'Standard'}
-                                                                            </span>
-                                                                        </div>
-                                                                        <span className={styles.detailDuration}>
-                                                                            {Math.floor((workout.duration || 0) / 60)}m {(workout.duration || 0) % 60}s
+                            {token && sessionHistory.length > 0 && (
+                                <section className={styles.historySection}>
+                                    <h2 className={styles.sectionTitle}>Session History</h2>
+                                    <div className={styles.historyList}>
+                                        {sessionHistory.map(session => (
+                                            <div
+                                                key={session.session_id}
+                                                className={`${styles.historyItem} ${selectedSession?.session_id === session.session_id ? styles.historyItemExpanded : ''}`}
+                                                onClick={() => setSelectedSession(selectedSession?.session_id === session.session_id ? null : session)}
+                                            >
+                                                <div className={styles.historyMain}>
+                                                    <div className={styles.historyInfo}>
+                                                        <span className={styles.historyName}>{session.name}</span>
+                                                        <span className={styles.historyDate}>
+                                                            {(() => {
+                                                                const date = session.created_at
+                                                                    ? new Date(session.created_at.replace(" ", "T") + "Z")
+                                                                    : new Date(parseInt(session.session_id));
+                                                                return date.toLocaleDateString();
+                                                            })()}
+                                                        </span>
+                                                    </div>
+                                                    <div className={styles.historyControls}>
+                                                        <div className={styles.historyStats}>
+                                                            {session.workouts.length} workouts
+                                                        </div>
+                                                        <button
+                                                            className={styles.sessionDeleteBtn}
+                                                            onClick={(e) => deleteHistorySession(e, session.session_id)}
+                                                            title="Remove from history"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {selectedSession?.session_id === session.session_id && (
+                                                    <div className={styles.sessionDetailListInline} onClick={e => e.stopPropagation()}>
+                                                        {session.workouts.map((w, idx) => {
+                                                            const workout = (w && typeof w === 'object') ? w : (workouts.find(p => p.id === w) || { name: 'Legacy Workout', duration: 0 });
+                                                            return (
+                                                                <div key={idx} className={styles.sessionDetailItemMini}>
+                                                                    <div className={styles.detailInfo}>
+                                                                        <span className={styles.detailName}>{workout.name}</span>
+                                                                        <span className={styles.detailType} style={{ color: workout.type === 'gentle' ? '#a594f9' : '#00ff88' }}>
+                                                                            {workout.type === 'gentle' ? 'Yoga' : 'Standard'}
                                                                         </span>
                                                                     </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
+                                                                    <span className={styles.detailDuration}>
+                                                                        {Math.floor((workout.duration || 0) / 60)}m {(workout.duration || 0) % 60}s
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
 
-                            </>
-                        )}
+                        </>
+                    )}
 
-                        {activeTab === 'received' && (
-                            <ReceivedRoutines
-                                token={token}
-                                onImport={(newWorkouts) => {
-                                    setWorkouts(prev => [...prev, ...newWorkouts]);
-                                    setActiveTab('routines');
-                                }}
-                            />
-                        )}
+                    {activeTab === 'received' && (
+                        <ReceivedRoutines
+                            token={token}
+                            onImport={(newWorkouts) => {
+                                setWorkouts(prev => [...prev, ...newWorkouts]);
+                                setActiveTab('routines');
+                            }}
+                        />
+                    )}
 
-                        {activeTab === 'friends' && <FriendsPanel token={token} />}
+                    {activeTab === 'friends' && <FriendsPanel token={token} />}
 
-                        <section className={styles.educationSection}>
-                            <div className={styles.eduGrid}>
-                                <div className={styles.eduCard}>
-                                    <h3>Why Yoga Matters</h3>
-                                    <p>
-                                        Yoga is more than just physical movement. It is a path to mental clarity,
-                                        stress reduction, and holistic well-being. By aligning breath with movement,
-                                        you build a deeper connection between mind and body, fostering resilience
-                                        in every aspect of life.
-                                    </p>
-                                </div>
-                                <div className={styles.eduCard}>
-                                    <h3>The Power of Laya</h3>
-                                    <p>
-                                        <em>Laya</em> means rhythm or flow. In practice (<em>Abhyasa</em>),
-                                        maintaining a consistent rhythm is what transforms effort into effortless
-                                        grace. This tracker helps you visualize your consistency, ensuring that
-                                        your rhythm remains steady as you grow.
-                                    </p>
-                                </div>
+                    <section className={styles.educationSection}>
+                        <div className={styles.eduGrid}>
+                            <div className={styles.eduCard}>
+                                <h3>Why Yoga Matters</h3>
+                                <p>
+                                    Yoga is more than just physical movement. It is a path to mental clarity,
+                                    stress reduction, and holistic well-being. By aligning breath with movement,
+                                    you build a deeper connection between mind and body, fostering resilience
+                                    in every aspect of life.
+                                </p>
                             </div>
-                        </section>
+                            <div className={styles.eduCard}>
+                                <h3>The Power of Laya</h3>
+                                <p>
+                                    <em>Laya</em> means rhythm or flow. In practice (<em>Abhyasa</em>),
+                                    maintaining a consistent rhythm is what transforms effort into effortless
+                                    grace. This tracker helps you visualize your consistency, ensuring that
+                                    your rhythm remains steady as you grow.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
 
 
-                    </main>
+                </main>
             ) : (
                 <Timer
                     workoutName={activeWorkout.name}
