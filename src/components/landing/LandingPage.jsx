@@ -1,170 +1,77 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './LandingPage.module.css';
 
 const LandingPage = ({ onStart, onLogin }) => {
-    const [countdown, setCountdown] = useState(6);
-    const diffRef = useRef(null);
-    const pricingRef = useRef(null);
+    const [step, setStep] = useState(0);
 
     useEffect(() => {
-        // Countdown timer
-        const timer = setInterval(() => {
-            setCountdown(prev => prev > 0 ? prev - 1 : 0);
-        }, 1000);
-
-        // Sequence: 
-        // 0s-2s: Hero
-        // 2s: Scroll to Intros
-        const scroll1 = setTimeout(() => {
-            diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 2000);
-
-        // 4s: Scroll to Pricing
-        const scroll2 = setTimeout(() => {
-            pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 4000);
-
-        // 6s: Redirect
-        const redirect = setTimeout(() => {
+        if (step > 2) {
             onStart();
-        }, 6000);
+            return;
+        }
 
-        return () => {
-            clearInterval(timer);
-            clearTimeout(scroll1);
-            clearTimeout(scroll2);
-            clearTimeout(redirect);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        const timer = setTimeout(() => {
+            setStep(prev => prev + 1);
+        }, 2500); // 2.5s per slide
+
+        return () => clearTimeout(timer);
+    }, [step, onStart]);
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <button className={styles.loginBtnNav} onClick={onLogin}>Login</button>
 
-            {/* Hero Section */}
-            <section className={styles.heroSection}>
-                <span className={styles.eyebrow}>Practice in Rhythm</span>
-                <h1 className={styles.heroTitle}>
-                    Stop guessing your practice.<br />
-                    Build a rhythm you actually keep.
-                </h1>
-                <p className={styles.heroSub}>
-                    The customizable yoga flow tracker for serial consistency.
-                    Built for dedicated practitioners who need structure, not just another video to follow.
-                </p>
-                <div>
-                    <button className={styles.ctaBtn} onClick={onStart}>Start Building Your Flow</button>
-                    <button className={styles.secondaryBtn} onClick={onLogin}>Sign In</button>
-                </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', flexDirection: 'column' }}>
+                {/* SLIDE 1: HERO */}
+                {step === 0 && (
+                    <section className={styles.heroSection} style={{ padding: '1rem', minHeight: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <span className={styles.eyebrow}>Practice in Rhythm</span>
+                        <h1 className={styles.heroTitle} style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
+                            Stop guessing.<br />Start flowing.
+                        </h1>
+                        <p className={styles.heroSub} style={{ maxWidth: '500px' }}>
+                            The operating system for your yoga practice.
+                        </p>
+                    </section>
+                )}
 
-                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
-                    Entering Flow in {countdown}s...
-                </div>
+                {/* SLIDE 2: FEATURES */}
+                {step === 1 && (
+                    <section className={styles.diffSection} style={{ padding: '1rem', minHeight: 'auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <h2 className={styles.sectionTitle} style={{ fontSize: '2rem' }}>Not Just a Timer</h2>
+                        <p className={styles.sectionDesc} style={{ maxWidth: '500px', margin: '1rem auto' }}>
+                            Flow Laya guides your state of flow with custom sequences, gentle chimes, and cloud sync.
+                        </p>
+                        <div className={styles.featureIcon} style={{ fontSize: '3rem', marginTop: '1rem' }}>⚡️ 🔊 ☁️</div>
+                    </section>
+                )}
 
-                <div className={styles.mockupContainer}>
-                    <div className={styles.timerMockup}>
-                        <div className={styles.timerCircle}>
-                            <span className={styles.timerText}>04:59</span>
+                {/* SLIDE 3: PRICING / INTRO */}
+                {step === 2 && (
+                    <section className={styles.pricingSection} style={{ padding: '1rem', minHeight: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <h2 className={styles.sectionTitle} style={{ fontSize: '2rem' }}>Simple & Powerful</h2>
+                        <div className={styles.pricingCard} style={{ margin: '2rem auto', maxWidth: '300px', padding: '1.5rem' }}>
+                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>Free or Pro</h3>
+                            <p style={{ color: 'rgba(255,255,255,0.7)' }}>Start for free. Upgrade for unlimited flows.</p>
                         </div>
-                        <span className={styles.timerLabel}>Warrior I • Active</span>
-                    </div>
-                    <div className={styles.listMockup}>
-                        <div className={`${styles.listItem} ${styles.listActive}`}>
-                            <div className={styles.listCheck}></div>
-                            <div className={styles.listLine}></div>
-                        </div>
-                        <div className={styles.listItem}>
-                            <div className={styles.listCheck} style={{ borderColor: '#444' }}></div>
-                            <div className={styles.listLine}></div>
-                        </div>
-                        <div className={styles.listItem}>
-                            <div className={styles.listCheck} style={{ borderColor: '#444' }}></div>
-                            <div className={styles.listLine}></div>
-                        </div>
-                        <div className={styles.listItem}>
-                            <div className={styles.listCheck} style={{ borderColor: '#444' }}></div>
-                            <div className={styles.listLine}></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                    </section>
+                )}
+            </div>
 
-            {/* Differentiation */}
-            <section className={styles.diffSection} ref={diffRef}>
-                <h2 className={styles.sectionTitle}>Why not just use a timer?</h2>
-                <p className={styles.sectionDesc}>
-                    Because Flow Laya is a <strong>Practice Operating System</strong>.
-                    Calculators are for math. Flow Laya is for rhythm.
-                    We don't just count down; we guide your state of flow.
-                </p>
-            </section>
+            {/* Progress Dots */}
+            <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: 'auto' }}>
+                {[0, 1, 2].map(i => (
+                    <div key={i} style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: i === step ? '#7b2ff7' : 'rgba(255,255,255,0.2)',
+                        transition: 'background 0.3s'
+                    }} />
+                ))}
+            </div>
 
-            {/* Features */}
-            <section className={styles.featureSection}>
-                <div className={styles.grid}>
-                    <div className={styles.featureCard}>
-                        <div className={styles.featureIcon}>⚡️</div>
-                        <h3 className={styles.featureTitle}>Build Your Flow</h3>
-                        <p className={styles.featureText}>Create custom sequences with drag-and-drop ease. Mix active and gentle poses.</p>
-                    </div>
-                    <div className={styles.featureCard}>
-                        <div className={styles.featureIcon}>🔊</div>
-                        <h3 className={styles.featureTitle}>Immersive Cues</h3>
-                        <p className={styles.featureText}>Gentle chimes or standard beeps. Customize the audio environment for your practice.</p>
-                    </div>
-                    <div className={styles.featureCard}>
-                        <div className={styles.featureIcon}>☁️</div>
-                        <h3 className={styles.featureTitle}>Cloud Sync</h3>
-                        <p className={styles.featureText}>Seamlessly sync your flows and history across all your devices.</p>
-                    </div>
-                    <div className={styles.featureCard}>
-                        <div className={styles.featureIcon}>🤝</div>
-                        <h3 className={styles.featureTitle}>Share with Friends</h3>
-                        <p className={styles.featureText}>Send your custom routines directly to friends or students.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* ICP */}
-            <section className={styles.icpSection}>
-                <div style={{ textAlign: 'center' }}>
-                    <h2 className={styles.sectionTitle}>Who is this for?</h2>
-                    <p className={styles.sectionDesc}>Built for discipline-driven practitioners, yoga instructors, and athletes.</p>
-                </div>
-            </section>
-
-            {/* Pricing */}
-            <section className={styles.pricingSection} ref={pricingRef}>
-                <h2 className={styles.sectionTitle}>Simple Pricing</h2>
-                <div className={styles.pricingGrid}>
-                    <div className={styles.pricingCard}>
-                        <h3>Free</h3>
-                        <div className={styles.price}>$0<span>/mo</span></div>
-                        <ul className={styles.featuresList}>
-                            <li><span className={styles.checkmark}>✓</span> 3 Custom Routines</li>
-                            <li><span className={styles.checkmark}>✓</span> Basic Timer</li>
-                            <li><span className={styles.checkmark}>✓</span> 3 Shared Routines</li>
-                        </ul>
-                        <button className={styles.secondaryBtn} onClick={onStart} style={{ marginLeft: 0, width: '100%' }}>Start Free</button>
-                    </div>
-                    <div className={`${styles.pricingCard} ${styles.pro}`}>
-                        <span className={styles.popularBadge}>Most Popular</span>
-                        <h3>Pro</h3>
-                        <div className={styles.price}>$1.99<span>/mo</span></div>
-                        <ul className={styles.featuresList}>
-                            <li><span className={styles.checkmark}>✓</span> Unlimited Routines</li>
-                            <li><span className={styles.checkmark}>✓</span> Unlimited Sharing</li>
-                            <li><span className={styles.checkmark}>✓</span> Detailed History</li>
-                            <li><span className={styles.checkmark}>✓</span> Priority Support</li>
-                        </ul>
-                        <button className={styles.ctaBtn} onClick={onLogin} style={{ width: '100%' }}>Go Pro</button>
-                    </div>
-                </div>
-                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    Entering Flow in {countdown}s...
-                </div>
-            </section>
+            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', paddingBottom: '2rem' }}>
+                Entering Flow...
+            </div>
         </div>
     );
 };

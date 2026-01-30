@@ -84,6 +84,13 @@ function App() {
         return () => window.removeEventListener('popstate', handleLocationChange);
     }, []);
 
+    // Scroll to top when entering app
+    useEffect(() => {
+        if (hasEnteredApp) {
+            window.scrollTo(0, 0);
+        }
+    }, [hasEnteredApp]);
+
     const isAdminDomain = window.location.hostname.includes('admin');
 
     if (isAdminDomain || currentPath.startsWith('/admin')) {
