@@ -3,9 +3,22 @@ import styles from './LandingPage.module.css';
 
 const LandingPage = ({ onStart, onLogin }) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [countdown, setCountdown] = useState(4);
 
     useEffect(() => {
         setIsVisible(true);
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    onStart();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -53,6 +66,9 @@ const LandingPage = ({ onStart, onLogin }) => {
                             <div className={styles.listLine}></div>
                         </div>
                     </div>
+                </div>
+                <div style={{ marginTop: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                    Entering Flow in {countdown}s...
                 </div>
             </section>
 

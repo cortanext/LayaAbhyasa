@@ -906,6 +906,13 @@ function App() {
                     <LandingPage onStart={() => setHasEnteredApp(true)} onLogin={() => setIsLoginOpen(true)} />
                     :
                     <main className={styles.dashboard}>
+                        {!user && (
+                            <div className={styles.guestBanner}>
+                                <span>Welcome to Guest Mode.</span>
+                                <span onClick={() => setIsLoginOpen(true)}><strong>Login or Register</strong></span>
+                                <span>to save your flow.</span>
+                            </div>
+                        )}
                         <header className={styles.header}>
                             <div className={styles.titleSection}>
                                 <div className={styles.brandGroup}>

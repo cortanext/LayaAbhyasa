@@ -1214,3 +1214,28 @@
     background: #7b2ff7;
     border-radius: 3px 3px 0 0;
 }
+
+.guestBanner {
+  background: linear-gradient(90deg, #2a2a2a, #1f1f1f);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.8rem;
+  text-align: center;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(123, 47, 247, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.guestBanner strong {
+  color: #7b2ff7;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.guestBanner strong:hover {
+  text-decoration: none;
+  filter: brightness(1.2);
+}
